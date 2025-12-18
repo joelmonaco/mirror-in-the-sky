@@ -91,7 +91,7 @@ function EncryptedWord({ word, isPunctuation = false }) {
     >
       <span 
         className={`inline-block transition-all duration-300 ${
-          isFullyRevealed ? 'text-white opacity-100' : 'text-white opacity-60'
+          isFullyRevealed ? 'text-white opacity-100' : 'text-white opacity-100'
         }`}
         style={{
           textShadow: isFullyRevealed 
@@ -144,6 +144,8 @@ function EncryptedWord({ word, isPunctuation = false }) {
 }
 
 export default function HomePage() {
+  const [inputs, setInputs] = useState(['', '', '', '', '', '', '', ''])
+  
   const text = `Aurelia, das hier ist der Beginn deines Rätsels. Die Spielregeln sind ganz einfach, denn...es gibt im Prinzip keine! Keine Tipps, nichts kann übersprungen werden.
 
 Wie lange wird es gehen? Lange. Erwarte nicht, dass du es heute lösen kannst. Auch nicht morgen...oder nächste Woche. Also lass dich überraschen. Und damit: Legen wir los!`
@@ -169,12 +171,39 @@ Wie lange wird es gehen? Lange. Erwarte nicht, dass du es heute lösen kannst. A
     return parts
   }
 
+  const handleInputChange = (index, value) => {
+    // Nur Buchstaben erlauben und auf einen Buchstaben begrenzen
+    const letter = value.replace(/[^a-zA-ZäöüÄÖÜß]/g, '').toUpperCase().slice(0, 1)
+    
+    const newInputs = [...inputs]
+    newInputs[index] = letter
+    setInputs(newInputs)
+
+    // Automatisch zum nächsten Feld springen, wenn ein Buchstabe eingegeben wurde
+    if (letter && index < 7) {
+      const nextInput = document.getElementById(`input-${index + 1}`)
+      if (nextInput) {
+        nextInput.focus()
+      }
+    }
+  }
+
+  const handleKeyDown = (index, e) => {
+    // Backspace: Gehe zum vorherigen Feld, wenn aktuelles Feld leer ist
+    if (e.key === 'Backspace' && !inputs[index] && index > 0) {
+      const prevInput = document.getElementById(`input-${index - 1}`)
+      if (prevInput) {
+        prevInput.focus()
+      }
+    }
+  }
+
   const parts = parseText(text)
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4">
       <div className="text-center max-w-4xl mx-auto">
-        <div className="text-white text-lg sm:text-xl md:text-2xl leading-relaxed">
+        <div className="text-white text-lg sm:text-xl md:text-2xl leading-relaxed mb-12">
           {parts.map((part, index) => {
             if (part.type === 'space') {
               return <span key={index}>{part.content}</span>
@@ -189,6 +218,26 @@ Wie lange wird es gehen? Lange. Erwarte nicht, dass du es heute lösen kannst. A
               )
             }
           })}
+        </div>
+        
+        {/* 8 Input-Felder */}
+        <div className="flex gap-3 justify-center items-center flex-wrap">
+          {inputs.map((value, index) => (
+            <input
+              key={index}
+              id={`input-${index}`}
+              type="text"
+              value={value}
+              onChange={(e) => handleInputChange(index, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(index, e)}
+              maxLength={1}
+              className="w-12 h-12 sm:w-14 sm:h-14 text-center text-white bg-transparent border-2 border-white rounded-md focus:outline-none focus:border-white focus:ring-2 focus:ring-white focus:ring-opacity-50 text-xl sm:text-2xl font-mono uppercase"
+              style={{
+                fontFamily: 'monospace',
+                letterSpacing: '0.1em',
+              }}
+            />
+          ))}
         </div>
       </div>
     </div>
