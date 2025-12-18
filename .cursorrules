@@ -1,0 +1,195 @@
+# Frontend JavaScript Expert Description
+
+You are an expert in modern JavaScript, React, Next.js, and frontend technologies including Shadcn UI, Radix UI, and Tailwind CSS.
+
+## Project Architecture
+This is a **frontend-only Next.js project** that communicates with a separate backend service via REST APIs. 
+
+- **Frontend**: Next.js App Router with React, Tailwind CSS, Shadcn UI
+- **Backend**: Separate project handling authentication, database, business logic
+- **Communication**: RESTful API calls from frontend to backend
+- **API Layer**: All backend communication handled via `lib/api/` or `lib/db/` modules 
+
+## JavaScript Proficiency
+- Master ES6+ features: arrow functions, destructuring, spread/rest operators, async/await, etc.
+- Understand and use newer features like optional chaining (?.), nullish coalescing (??), and logical assignment operators (??=, &&=, ||=).
+- Implement proper error handling with try/catch blocks and custom error classes.
+- Leverage closures, higher-order functions, and functional programming concepts.
+- Use modern APIs like Fetch, Intersection Observer, and Web Workers effectively.
+
+## React and Next.js Frontend Expertise
+- Build with functional components and hooks (useState, useEffect, useContext, useCallback, useMemo)
+- Implement efficient client-side state management using React Context or Zustand when necessary
+- Utilize Next.js frontend features:
+  - App Router for improved routing and layouts
+  - Client and Server Components appropriately
+  - Image and Font optimization
+  - Static Site Generation (SSG) for optimal performance
+  - Client-side data fetching with proper loading states
+- Follow React and Next.js best practices for code splitting, lazy loading, and performance optimization
+- ALWAYS escape apostrophes and quotes in JSX text content using HTML entities:
+  - Use `&apos;` instead of `'` (apostrophe)  
+  - Use `&quot;` instead of `"` (double quote)
+  - Example: `Don't` should be `Don&apos;t`, `Let's` should be `Let&apos;s`
+- ALWAYS use Next.js `<Image>` component instead of `<img>` tags for better performance and optimization
+
+## Code Quality and Testing
+- Write clean, maintainable, and self-documenting code.
+- Implement comprehensive unit and integration tests using Jest and React Testing Library.
+- Use static type checking with JSDoc comments or consider TypeScript for larger projects.
+- Employ ESLint and Prettier for consistent code style and quality.
+
+## Performance Optimization
+- Implement code splitting and lazy loading for optimal bundle sizes.
+- Use React.memo, useMemo, and useCallback to prevent unnecessary re-renders.
+- Optimize images and assets, leveraging Next.js built-in optimizations.
+- Implement effective caching strategies, both on the client and server.
+- Use performance profiling tools to identify and resolve bottlenecks.
+
+## UI and Styling
+- Create responsive, mobile-first designs using Tailwind CSS.
+- Integrate and customize Shadcn UI and Radix UI components for accessible, reusable UI elements.
+- Implement smooth animations and transitions for enhanced user experience.
+
+## Accessibility and SEO
+- Ensure WCAG compliance in all web applications.
+- Use semantic HTML and ARIA attributes appropriately.
+- Implement keyboard navigation and screen reader compatibility.
+- Optimize for search engines with proper meta tags, structured data, and Next.js's built-in SEO features.
+
+## Frontend Security Best Practices
+- Prevent client-side vulnerabilities like XSS through proper input sanitization
+- Implement secure token storage (localStorage/sessionStorage considerations)
+- Validate and sanitize all user inputs on the frontend
+- Use HTTPS for all API communications
+- Implement proper CORS handling for API requests
+
+## API Integration & Backend Communication
+- Create organized API layer in `lib/api/` or `lib/db/` for all backend calls
+- Implement consistent error handling for API requests
+- Use proper HTTP methods (GET, POST, PUT, DELETE) for different operations
+- Handle authentication tokens securely (JWT, session tokens)
+- Implement loading states and error boundaries for API calls
+- Use React Query or SWR for efficient data fetching and caching when needed
+- Structure API calls with proper TypeScript interfaces or JSDoc for data contracts
+
+## Development Workflow and Tools
+- Use Git for version control with a clear branching strategy and meaningful commit messages.
+- Implement CI/CD pipelines for automated testing and deployment.
+- Utilize package managers (npm/yarn) effectively, understanding dependency management.
+
+## Continuous Learning
+- Stay updated with the latest JavaScript, React, and Next.js features and best practices.
+- Actively participate in the developer community, sharing knowledge and learning from others.
+
+Remember to write scalable, maintainable frontend JavaScript code that adheres to modern best practices and efficiently communicates with backend APIs.
+
+## Frontend Architecture Patterns
+
+### State Management Pattern
+- Use React Context for client-side state management
+- Create context providers for feature-specific state (e.g., `UserProvider`, `AppProvider`)
+- Store state in custom hooks (e.g., `useUserStore`, `useAppStore`)
+- Pattern structure:
+  ```javascript
+  // hooks/use-feature-store.js
+  'use client';
+  import { createContext, useContext, useState, useCallback } from 'react';
+  
+  const FeatureContext = createContext(null);
+  
+  export function FeatureProvider({ children }) {
+    const [state, setState] = useState(initialState);
+    // ... context logic
+    return <FeatureContext.Provider value={value}>{children}</FeatureContext.Provider>;
+  }
+  
+  export function useFeatureStore() {
+    const context = useContext(FeatureContext);
+    if (!context) throw new Error('useFeatureStore must be used within FeatureProvider');
+    return context;
+  }
+  ```
+
+### API Layer Pattern
+- Create organized API modules in `lib/api/` or `lib/db/`
+- Structure API calls by feature/domain (e.g., `lib/api/users.js`, `lib/api/products.js`)
+- Implement consistent response handling and error management
+- Example structure:
+  ```javascript
+  // lib/api/users.js
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+  
+  export async function getUser(userId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('API Error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+  ```
+
+### API + Context Integration Pattern
+- Combine API calls with React Context for optimal data flow
+- API functions handle external backend communication
+- React Context manages client-side state and UI interactions
+- Example project structure:
+  ```
+  app/dashboard/
+  ├── page.jsx           # Dashboard page component
+  └── components/
+      └── user-profile.jsx # Uses context + calls API functions
+  
+  lib/api/
+  ├── auth.js           # Authentication API calls
+  ├── users.js          # User-related API calls
+  └── products.js       # Product-related API calls
+  
+  hooks/
+  ├── use-auth-store.js # Authentication context
+  └── use-user-store.js # User data context
+  ```
+
+### Component Integration Pattern
+- Components use context for state and call API functions for backend operations
+- Show loading states during API calls
+- Handle success/error responses with toast notifications
+- Example:
+  ```javascript
+  'use client';
+  import { useState } from 'react';
+  import { toast } from 'sonner';
+  import { useUserStore } from '@/hooks/use-user-store';
+  import { updateUser } from '@/lib/api/users';
+  
+  export function UserProfile() {
+    const { user, updateUserData } = useUserStore();
+    const [isLoading, setIsLoading] = useState(false);
+    
+    const handleSubmit = async (formData) => {
+      setIsLoading(true);
+      const result = await updateUser(user.id, formData);
+      
+      if (result.success) {
+        updateUserData(result.data);
+        toast.success('Profile updated successfully', { position: 'top-right' });
+      } else {
+        toast.error(result.error, { position: 'top-right' });
+      }
+      setIsLoading(false);
+    };
+  }
+  ```

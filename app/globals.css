@@ -1,0 +1,973 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Butler:wght@300;400;700&display=swap');
+@import "react-image-crop/dist/ReactCrop.css";
+
+@plugin 'tailwindcss-animate';
+@plugin 'tailwind-scrollbar-hide';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-fade-in: fadeIn 0.3s ease-out;
+  --animate-slide-in: slideIn 0.3s ease-out;
+  --animate-shine: shine 0.6s ease-out;
+  --animate-shimmer: shimmer 1.5s ease-in-out infinite;
+  --animate-pulse-enhanced: pulse-enhanced 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-green-pulse: green-pulse 2s infinite;
+  --animate-shine-interval: shineInterval 4s ease-out infinite;
+
+  /* Basis Radius System */
+  --radius-px-6: 6px;       /* Error-Boxen */  
+  --radius-px-8: 8px;       /* Error-Boxen */  
+  --radius-px-9: 9px;       /* Radio Options Modal */
+  --radius-px-10: 10px;      /* Buttons, Inputs */
+  --radius-px-12: 12px;      /* Event Switcher */
+  --radius-px-14: 14px;      /* Popover Content */
+  --radius-px-16: 16px;      /* Table */
+  --radius-px-18: 18px;      /* Kleine Container, Toolbox */  
+  --radius-px-20: 20px;      /* z.b. Gefülltes Bild */
+  --radius-px-24: 24px;      /* Große Modals (Desktop) */
+  --radius-px-28: 28px;      /* Page Container z.b. leerer Bild Container */
+  --radius-px-32: 32px;      /* Thank You Page */
+
+
+  --shadow-layered: 
+    0px 11px 22px rgba(0, 0, 0, 0.04),
+    0px 5.57px 9.59px rgba(0, 0, 0, 0.027),
+    0px 2.2px 3.58px rgba(0, 0, 0, 0.02),
+    0px 0.48px 1.27px rgba(0, 0, 0, 0.013);
+
+    --shadow-inner: 
+    inset 0 -2px 2px rgba(255, 255, 255, 0.4),
+    inset 0 2px 4px rgba(0, 0, 0, 0.02),
+    0 0 0 1px rgba(0, 0, 0, 0.08);
+
+    --shadow-low: 
+  0px 4px 4px rgba(0, 0, 0, 0.07),
+  0px 1.54px 1.27px rgba(0, 0, 0, 0.0425),
+  0px 0.33px 0.33px rgba(0, 0, 0, 0.0275);
+
+  --shadow-medium:
+  0px 4px 4px rgba(0, 0, 0, 0.02),
+  0px 1.54px 1.27px rgba(0, 0, 0, 0.0121),
+  0px 0.33px 0.33px rgba(0, 0, 0, 0.0079);
+
+  --shadow-high: 
+  0px 13px 25px rgba(0, 0, 0, 0.03),
+  0px 8.43px 14.64px rgba(0, 0, 0, 0.0228),
+  0px 5.01px 7.96px rgba(0, 0, 0, 0.0182),
+  0px 2.6px 4.06px rgba(0, 0, 0, 0.015),
+  0px 1.06px 2.04px rgba(0, 0, 0, 0.0118),
+  0px 0.24px 0.98px rgba(0, 0, 0, 0.0072);
+
+  --shadow-select:
+  inset 0 2px 2px rgba(255, 255, 255, 1.0),
+  inset 0 -2px 4px rgba(0, 0, 0, 0.02),
+  0 0 0 1px rgba(0, 0, 0, 0.08),
+  0 2px 2px rgba(0, 0, 0, 0.03);
+
+  --shadow-button:
+  inset 0 8px 8px -4px rgba(255, 255, 255, 0),
+  inset 0 4px 4px -2px rgba(255, 255, 255, 0.1),
+  inset 0 2px 2px -1px rgba(255, 255, 255, 0.2),
+  inset 0 1px 1px 0px rgba(255, 255, 255, 0.3),
+  0px 4px 4px rgba(0, 0, 0, 0.07),
+  0px 1.54px 1.27px rgba(0, 0, 0, 0.0425),
+  0px 0.33px 0.33px rgba(0, 0, 0, 0.0275);
+
+  --shadow-rounded-button:
+  0px 7px 9px rgba(0, 0, 0, 0.06),
+  0px 2.7px 2.87px rgba(0, 0, 0, 0.0364),
+  0px 0.57px 0.73px rgba(0, 0, 0, 0.0236);
+
+  --color-gray-opacity-0: rgba(0, 0, 0, 0.0);
+  --color-gray-opacity-2: rgba(0, 0, 0, 0.02);
+  --color-gray-opacity-3: rgba(0, 0, 0, 0.03);
+  --color-gray-opacity-4: rgba(0, 0, 0, 0.04);
+  --color-gray-opacity-5: rgba(0, 0, 0, 0.05);
+  --color-gray-opacity-6: rgba(0, 0, 0, 0.06);
+  --color-gray-opacity-8: rgba(0, 0, 0, 0.08);
+  --color-gray-opacity-10: rgba(0, 0, 0, 0.1);
+  --color-gray-opacity-20: rgba(0, 0, 0, 0.2);
+  --color-gray-opacity-30: rgba(0, 0, 0, 0.3);
+  --color-gray-opacity-40: rgba(0, 0, 0, 0.4);
+  --color-gray-opacity-50: rgba(0, 0, 0, 0.5);
+  --color-gray-opacity-60: rgba(0, 0, 0, 0.6);
+  --color-gray-opacity-70: rgba(0, 0, 0, 0.7);
+
+  --color-gray-50: #f9f9f9;
+  --color-gray-100: #f0f0f0;
+  --color-gray-200: #e2e2e2;
+  --color-gray-300: #cccccc;
+  --color-gray-400: #999999;
+  --color-gray-500: #666666;
+  --color-gray-600: #444444;
+  --color-gray-700: #333333;
+  --color-gray-800: #222222;
+  --color-gray-900: #1a1a1a;
+  --color-gray-950: #111111;
+
+  --button-color: #42FF7B;
+
+  /* green */
+  --color-primary: #42FF7B;
+  --color-primary-foreground: #000000;
+
+  /* blue */
+  --color-secondary: #5191FF;
+  --color-secondary-foreground: #FFFFFF;
+
+  /* red  (Table Editor Abgesagt) */
+  --color-tertiary: #FFB2B2; 
+  --color-tertiary-foreground: #000000;
+
+  /* tourquise (RSVP Button) */
+  --color-tourquise: #008FA0;
+  --color-tourquise-foreground: #FFFFFF;
+
+  /* Logo red */
+  --color-logo-red: #F68282;
+
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  /* Custom font families */
+  --font-butler: 'Butler', serif;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fade {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  @keyframes slideIn {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+  @keyframes shine {
+    0% {
+      transform: translateX(-100%) skewX(-25deg);
+    }
+    100% {
+      transform: translateX(100%) skewX(-25deg);
+    }
+  }
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes pulse-enhanced {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+  @keyframes shineInterval {
+    0% {
+      transform: translateX(-100%) skewX(-25deg);
+    }
+    15% {
+      transform: translateX(100%) skewX(-25deg);
+    }
+    100% {
+      transform: translateX(100%) skewX(-25deg);
+    }
+  }
+  
+  /* Voice Call Logo Animations */
+  @keyframes speechPulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.8;
+    }
+  }
+  
+  @keyframes speechBounce {
+    0%, 100% {
+      transform: scale(1) translateY(0);
+    }
+    25% {
+      transform: scale(1.05) translateY(-2px);
+    }
+    50% {
+      transform: scale(1.1) translateY(-4px);
+    }
+    75% {
+      transform: scale(1.05) translateY(-2px);
+    }
+  }
+  
+  @keyframes gentleFloat {
+    0%, 100% {
+      transform: scale(1) translateY(0);
+    }
+    50% {
+      transform: scale(1.02) translateY(-3px);
+    }
+  }
+  
+  @keyframes flicker {
+    0%, 100% {
+      opacity: 1;
+      filter: brightness(1);
+    }
+    2% {
+      opacity: 0.98;
+      filter: brightness(0.98);
+    }
+    4% {
+      opacity: 1;
+      filter: brightness(1.02);
+    }
+    6% {
+      opacity: 0.99;
+      filter: brightness(0.99);
+    }
+    8% {
+      opacity: 1;
+      filter: brightness(1);
+    }
+    50% {
+      opacity: 0.96;
+      filter: brightness(0.96);
+    }
+    52% {
+      opacity: 1;
+      filter: brightness(1.01);
+    }
+    54% {
+      opacity: 0.97;
+      filter: brightness(0.97);
+    }
+    56% {
+      opacity: 1;
+      filter: brightness(1);
+    }
+  }
+  
+  @keyframes shimmer {
+    0% {
+      text-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.5),
+        0 0 20px rgba(255, 255, 255, 0.3),
+        0 0 30px rgba(255, 255, 255, 0.2);
+      filter: brightness(1);
+    }
+    50% {
+      text-shadow: 
+        0 0 20px rgba(255, 255, 255, 0.8),
+        0 0 40px rgba(255, 255, 255, 0.6),
+        0 0 60px rgba(255, 255, 255, 0.4),
+        0 0 80px rgba(255, 255, 255, 0.2);
+      filter: brightness(1.2);
+    }
+    100% {
+      text-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.5),
+        0 0 20px rgba(255, 255, 255, 0.3),
+        0 0 30px rgba(255, 255, 255, 0.2);
+      filter: brightness(1);
+    }
+  }
+  
+  @keyframes shimmerGlow {
+    0%, 100% {
+      text-shadow: 
+        0 0 8px rgba(255, 255, 255, 0.55),
+        0 0 16px rgba(255, 255, 255, 0.4),
+        0 0 24px rgba(255, 255, 255, 0.25),
+        0 0 32px rgba(255, 255, 255, 0.15);
+    }
+    50% {
+      text-shadow: 
+        0 0 12px rgba(255, 255, 255, 0.75),
+        0 0 24px rgba(255, 255, 255, 0.55),
+        0 0 36px rgba(255, 255, 255, 0.35),
+        0 0 48px rgba(255, 255, 255, 0.2);
+    }
+  }
+  
+  @keyframes glowFadeIn {
+    from {
+      text-shadow: 
+        0 0 3px rgba(255, 255, 255, 0.1),
+        0 0 6px rgba(255, 255, 255, 0.05);
+    }
+    to {
+      text-shadow: 
+        0 0 8px rgba(255, 255, 255, 0.55),
+        0 0 16px rgba(255, 255, 255, 0.4),
+        0 0 24px rgba(255, 255, 255, 0.25),
+        0 0 32px rgba(255, 255, 255, 0.15);
+    }
+  }
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= --theme(--breakpoint-sm)) {
+    max-width: none;
+  }
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+
+  /* Set background color for html and body to prevent white background on scroll */
+  html {
+    background: transparent;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  /* Ensure the body covers the full viewport and beyond for scrolling */
+  body {
+    background: transparent;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Animation for the gradient shift */
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Ensure no white background shows through */
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Prevent any white background from showing */
+  #__next,
+  .nextjs-toast-errors-parent {
+    background: transparent !important;
+  }
+
+  /* Ensure all containers are transparent */
+  div, section, main, aside, header, footer {
+    background-color: transparent;
+  }
+
+  /* Prevent any scrolling issues with background */
+  * {
+    background-attachment: scroll !important;
+  }
+
+  html::before,
+  body::before {
+    background-attachment: fixed !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+  }
+
+  /* Only apply background to specific elements that need it */
+  .bg-white,
+  .bg-gray-50,
+  .bg-gray-100 {
+    background-color: var(--color-gray-50) !important;
+  }
+
+  /* Force the background to stay fixed and cover everything */
+  html::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    z-index: -9999;
+    pointer-events: none;
+    will-change: auto;
+    transform: translateZ(0);
+  }
+
+  html[data-theme="dark"]::before {
+    background: #000000;
+  }
+
+  /* Additional fixed background layer */
+  
+  /* React Image Crop Overrides */
+  .ReactCrop {
+    position: relative !important;
+  }
+  
+  .ReactCrop__crop-selection {
+    border: 2px solid rgba(255, 255, 255, 0.8) !important;
+    background-color: rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  .ReactCrop__drag-handle {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    border: 2px solid rgba(255, 255, 255, 1) !important;
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 50% !important;
+  }
+  
+  .ReactCrop__drag-handle:hover {
+    background-color: rgba(255, 255, 255, 1) !important;
+    transform: scale(1.1) !important;
+  }
+  
+  .ReactCrop__crop-selection:before {
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    z-index: -9998;
+    pointer-events: none;
+    will-change: auto;
+    transform: translateZ(0);
+  }
+
+  body[data-theme="dark"]::before {
+    background: #000000;
+  }
+
+  /* Fixed background container */
+  #fixed-background {
+    background: #000000;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: -9999 !important;
+    pointer-events: none !important;
+    will-change: auto !important;
+    transform: translateZ(0) !important;
+  }
+
+  [data-theme="dark"] #fixed-background {
+    background: #000000;
+  }
+
+  /* Safari-specific fixes for blurry icons */
+  @supports (-webkit-appearance: none) {
+    .safari-icon-fix {
+      -webkit-transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      -webkit-perspective: 1000;
+      -webkit-font-smoothing: antialiased;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      perspective: 1000px;
+    }
+    
+    /* Fix for transform-based positioning in Safari */
+    .safari-center-fix {
+      top: 50% !important;
+      transform: translateY(-50%) translateZ(0) !important;
+      -webkit-transform: translateY(-50%) translateZ(0) !important;
+    }
+  }
+
+  /* Glassmorphic container backgrounds */
+  .gradient-container {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    padding: 3rem 1.5rem;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .gradient-container-large {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 32px;
+    padding: 4rem;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .gradient-header {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Disable spell check underlines */
+  input,
+  textarea {
+    -webkit-text-decoration-skip: none;
+    text-decoration-skip: none;
+  }
+
+  /* Safari-specific input field fixes */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-border-radius: 0;
+    border-radius: inherit;
+  }
+
+  /* Force consistent background rendering in Safari */
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus {
+    -webkit-appearance: none;
+    -webkit-box-shadow: none;
+    box-shadow: inherit;
+    outline: none;
+  }
+
+  /* Ensure Safari respects custom background colors */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: inherit;
+    transition: background-color 5000s ease-in-out 0s;
+    box-shadow: inset 0 0 20px 20px transparent;
+  }
+
+  /* Prevent automatic scrolling behavior on mobile devices */
+  @media (max-width: 640px) {
+    html {
+      scroll-behavior: auto !important;
+    }
+    
+    /* Prevent layout shifts during height adjustments */
+    textarea[data-autosize] {
+      overflow: hidden !important;
+      resize: none !important;
+      transition: height 0.1s ease-out;
+    }
+  }
+
+}
+
+@layer base {
+  :root {
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+
+    --button-color: rgba(54, 62, 212, 0);
+    --button-color-light: color-mix(in srgb, var(--button-color) 20%, white);
+    --button-color-darker: color-mix(in srgb, var(--button-color) 80%, black);
+    --foreground: #ffffff;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+}
+
+.infinite-scroll-component {
+  overflow: hidden !important
+}
+
+
+.button-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.button-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  transform: translateX(-100%) skewX(-25deg);
+  pointer-events: none;
+}
+
+/* Auto-Shine Variante */
+.button-shine-auto::before {
+  animation: var(--animate-shimmer);
+}
+
+/* Interval-Shine alle 4 Sekunden */
+.button-shine-interval::before {
+  animation: var(--animate-shine-interval);
+}
+
+
+/* Flip Card */
+
+
+/* The flip card container - set the width and height to whatever you want. We have added the border property to demonstrate that the flip itself goes out of the box on hover (remove perspective if you don't want the 3D effect */
+.flip-card {
+  background-color: transparent;
+  perspective: 1000px; /* Remove this if you don't want the 3D effect */
+}
+
+/* This container is needed to position the front and back side */
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+/* Do an horizontal flip when the flipped class is applied */
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+/* Position the front and back side */
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden; /* Safari */
+  backface-visibility: hidden;
+}
+
+/* Style the front side (fallback if image is missing) */
+.flip-card-front {
+  transform: rotateY(180deg);
+}
+
+/* Style the back side */
+.flip-card-back {
+
+}
+
+/* Logo Animation Keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lineGrow {
+  0% {
+    opacity: 0;
+    stroke-dasharray: 0 100;
+  }
+  50% {
+    opacity: 1;
+    stroke-dasharray: 35 100;
+  }
+  100% {
+    opacity: 1;
+    stroke-dasharray: 35 100;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-line-grow {
+  animation: lineGrow 0.6s ease-out forwards;
+  stroke-dasharray: 0 100;
+}
+
+/* Green pulse animation for listening state */
+@keyframes greenPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+  }
+}
+
+.animate-green-pulse {
+  animation: greenPulse 2s ease-in-out infinite;
+}
+
+/* Checkmark Animation */
+@keyframes checkmark-circle {
+  0% {
+    stroke-dasharray: 0 157;
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dasharray: 157 157;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes checkmark-check {
+  0% {
+    stroke-dasharray: 0 30;
+    stroke-dashoffset: 30;
+    opacity: 0;
+  }
+  50% {
+    opacity: 0;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dasharray: 30 30;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.checkmark-animation .checkmark-circle {
+  animation: checkmark-circle 0.6s ease-out forwards;
+}
+
+.checkmark-animation .checkmark-check {
+  animation: checkmark-check 0.4s ease-out 0.3s forwards;
+  opacity: 0;
+}
+
+.shimmer-glow {
+  animation: 
+    glowFadeIn 1.5s ease-out forwards,
+    shimmerGlow 4s ease-in-out 1.5s infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+@keyframes blue-black-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-blue-black-shimmer {
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 25%, #000000 50%, #1a1a3e 75%, #0a0a1a 100%);
+  background-size: 200% 200%;
+  animation: blue-black-shimmer 8s ease-in-out infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float-badge {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-8px);
+  }
+}
+
+/* Avatar Scroll Animationen für Startseite */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scroll-right {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-scroll-left {
+  animation: scroll-left linear infinite;
+}
+
+.animate-scroll-right {
+  animation: scroll-right linear infinite;
+}
+
+/* Vertikale Scroll Animationen */
+@keyframes scroll-up {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes scroll-down {
+  0% {
+    transform: translateY(-50%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.animate-scroll-up {
+  animation: scroll-up linear infinite;
+}
+
+.animate-scroll-down {
+  animation: scroll-down linear infinite;
+}
+

@@ -1,0 +1,533 @@
+{
+  "auth": {
+    "Error": {
+      "accountExists": "An account already exists. Try logging in instead.",
+      "tryAgain": "Please try again."
+    },
+    "ChangedEmail": {
+      "title": "Your email has been successfully added/changed.",
+      "description": "If you didn't have an account before, set your password now.",
+      "linkText": "Click here",
+      "imageAlt": "Image"
+    },
+    "ForgotPassword": {
+      "success": "You have received an email to reset your password.",
+      "imageAlt": "Image",
+      "emailNotFound": "This email address was not found.",
+      "tryAgain": "Please try again.",
+      "error": "An error occurred. Please try again.",
+      "resetButton": "Reset",
+      "title": "Forgot password",
+      "description": "Enter your email to reset your password"
+    },
+    "verify": {
+      "invalidLink": "Invalid link",
+      "linkExpired": "The link has expired",
+      "mustBeLoggedIn": "You must be logged in",
+      "invalidVerificationLink": "Invalid verification link.",
+      "emailVerified": "Email verified successfully",
+      "verificationError": "Error during email verification. Please try again."
+    },
+    "AuthCodeError": {
+      "title": "Error",
+      "description": "Unfortunately, an error occurred. Please try again.",
+      "imageAlt": "Image"
+    },
+    "linking": {
+      "invalidProvider": "Invalid provider",
+      "redirectFailed": "Redirect failed",
+      "invalidCredentials": "Invalid email or password",
+      "tryAgain": "Please try again",
+      "errors": {
+        "linkingFailed": "Linking account failed",
+        "verificationFailed": "Verification failed",
+        "updateFailed": "Updating account failed"
+      },
+      "form": {
+        "phoneNumber": "Phone number",
+        "loginWithPhone": "Login with phone number",
+        "smsCodeInstructions": "You will receive a code per SMS to verify your phone number.",
+        "codePlaceholder": "123456",
+        "continue": "Continue",
+        "email": "Email",
+        "emailPlaceholder": "m@example.com",
+        "password": "Password",
+        "forgotPassword": "Forgot password?",
+        "login": "Login",
+        "or": "OR",
+        "continueWithGoogle": "Continue with Google",
+        "continueWithPhone": "Continue with phone number"
+      },
+      "verificationEmailSent": "A verification link has been sent to your email."
+    },
+    "login": {
+      "phoneNumber": "Phone number",
+      "loginWithPhone": "Login with phone number",
+      "smsCodeInstructions": "You will receive a code per SMS to verify your phone number.",
+      "codePlaceholder": "123456",
+      "continue": "Continue",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "login": "Login",
+      "or": "OR",
+      "continueWithGoogle": "Continue with Google",
+      "continueWithPhone": "Continue with phone number",
+      "noAccount": "No account?",
+      "register": "Register",
+      "googleLogo": "Google Logo",
+      "actions": {
+        "invalidProvider": "Invalid provider",
+        "redirectFailed": "Redirect failed",
+        "invalidCredentials": "Invalid email or password. If you come from v1, please register again.",
+        "tryAgain": "Please try again",
+        "googleLoginError": "Error logging in with Google",
+        "facebookLoginError": "Error logging in with Facebook",
+        "appleLoginError": "Error logging in with Apple",
+        "incorrectEmailOrPassword": "Incorrect email or password",
+        "phoneLoginError": "Error logging in with phone number",
+        "otpVerificationError": "Error verifying SMS code"
+      },
+      "page": {
+        "title": "Login",
+        "description": "Use email and password to login.",
+        "noAccount": "No account?",
+        "register": "Register",
+        "heroImage": "Login page background image"
+      }
+    },
+    "signup": {
+      "actions": {
+        "invalidProvider": "Invalid provider",
+        "tryAgain": "Please try again",
+        "accountExists": "An account already exists"
+      },
+      "page": {
+        "title": "Register",
+        "description": "Create an account to get started",
+        "haveAccount": "Already have an account?",
+        "login": "Login",
+        "heroImage": "Registration page background image"
+      },
+      "form": {
+        "phoneNumber": "Phone number",
+        "loginWithPhone": "Register with phone number",
+        "smsCodeInstructions": "You will receive a code per SMS to verify your phone number.",
+        "codePlaceholder": "123456",
+        "continue": "Continue",
+        "email": "Email",
+        "emailPlaceholder": "m@example.com",
+        "password": "Password",
+        "register": "Register",
+        "or": "OR",
+        "continueWithGoogle": "Continue with Google",
+        "continueWithoutAccount": "Continue without account",
+        "googleLogo": "Google Logo",
+        "firstname": "First name",
+        "firstnamePlaceholder": "Max",
+        "lastname": "Last name",
+        "lastnamePlaceholder": "Muster"
+      }
+    },
+    "updatePassword": {
+      "error": "Your password could not be updated.",
+      "success": {
+        "title": "You have successfully changed your password.",
+        "heroImage": "Success page background image"
+      },
+      "page": {
+        "title": "Change password",
+        "description": "Enter your new password",
+        "heroImage": "Change password background image"
+      },
+      "link": {
+        "checking": "Your link is being checked...",
+        "expired": "Your link has expired"
+      }
+    }
+  },
+  "notFound": {
+    "title": "404 - Page Not Found",
+    "description": "Oops! The page you're looking for doesn't exist or has been moved.",
+    "returnHome": "Return Home"
+  },
+  "alerts": {
+    "destructive": {
+      "title": "Oops! Something went wrong.",
+      "description": "An error occurred. Please try again."
+    }
+  },
+  "authDialog": {
+    "login": "Login",
+    "signup": "Sign up",
+    "noAccountYet": "No account yet?",
+    "alreadyHaveAccount": "Already have an account?"
+  },
+  "form": {
+    "elements": {
+      "textfield": "Text Field",
+      "email": "Email Address",
+      "radio": "Radio Group"
+    },
+    "placeholderEdit": {
+      "title": "Edit Placeholder",
+      "textfieldTitle": "Edit Text Field Placeholder",
+      "emailTitle": "Edit Email Placeholder",
+      "placeholder": "Enter placeholder...",
+      "textfieldPlaceholder": "Enter text field placeholder...",
+      "emailPlaceholder": "Enter email placeholder...",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "questionItem": {
+      "questionPlaceholder": "Add Question...",
+      "subtitlePlaceholder": "Add subtitle...",
+      "textfieldAnswer": "Text Field Answer",
+      "emailAnswer": "Email Address",
+      "radioAnswer": "Add option...",
+      "defaultAnswer": "Answer...",
+      "noOptionsAdded": "No options added",
+      "addElement": "Add Element",
+      "addQuestion": "Add Question",
+      "deleteSection": "Delete Section"
+    },
+    "radioOptions": {
+      "optionPlaceholder": "Enter option...",
+      "done": "Done"
+    },
+    "thankYouPage": {
+      "defaultTitle": "We're looking forward to seeing you!",
+      "defaultSubtitle": "Your response has been successfully sent to the host.",
+      "titlePlaceholder": "Enter title...",
+      "subtitlePlaceholder": "Enter subtitle..."
+    },
+    "guestForm": {
+      "invalidEmail": "Invalid email",
+      "defaultTextAnswer": "Your answer...",
+      "defaultEmailPlaceholder": "your@email.com",
+      "selectPlaceholder": "Select",
+      "notAttendingTitle": "Sorry that you can't make it!",
+      "notAttendingSubtitle": "Your decline has been forwarded to the host. Maybe next time!",
+      "defaultTitle": "We're looking forward to seeing you!",
+      "defaultSubtitle": "Your response has been successfully sent to the host.",
+      "noAnswerFields": "No answer fields defined",
+      "submit": "Submit",
+      "next": "Next",
+      "back": "Back",
+      "eventIdMissing": "Event ID missing",
+      "errorSendingResponse": "Error sending response",
+      "createGuestForm": "Create Guest Form",
+      "saveError": "Error saving guest form",
+      "createEvent": "Create Event",
+      "addQuestion": "Add Question"
+    }
+  },
+  "shareContent": {
+    "defaultTitle": "Event Invitation",
+    "copyLink": "Copy Link",
+    "linkCopied": "Link Copied",
+    "sendToGuests": "Send your event link to all guests",
+    "shareEventLink": "Share Event Link",
+    "linkCopiedTooltip": "Link copied!",
+    "copyError": "Link could not be copied.",
+    "shareError": "Sharing not possible."
+  },
+  "signupContent": {
+    "register": "Register",
+    "login": "Login",
+    "email": "Email",
+    "password": "Password",
+    "registerSuccess": "Registration successful",
+    "registerError": "Registration failed",
+    "loginSuccess": "Login successful",
+    "loginError": "Login failed",
+    "genericError": "An error occurred. Please try again."
+  },
+  "sortPopup": {
+    "alphabetical": "Alphabetical",
+    "custom": "Custom",
+    "selectValue": "Select value",
+    "noSelection": "No selection"
+  },
+  "tableEditor": {
+    "noResponse": "No response",
+    "anonymous": "Anonymous",
+    "responseHeader": "Response",
+    "responseDateHeader": "Response Date",
+    "statusAttending": "Attending",
+    "statusMaybe": "Maybe",
+    "statusNotAttending": "Not attending",
+    "statusNoResponse": "No response"
+  },
+  "eventSwitcher": {
+    "loadEventsError": "Failed to load events",
+    "loadEventsErrorLog": "Error loading events:",
+    "draft": "Draft",
+    "pending": "Pending",
+    "noEventsCreated": "No events created yet",
+    "createNewEvent": "Create New Event"
+  },
+  "locationPicker": {
+    "addLocation": "Add Location",
+    "noLocationsFound": "No locations found",
+    "enterLocation": "Enter Location"
+  },
+  "privatePopover": {
+    "publicTitle": "Anyone with the link",
+    "publicDescription": "The invitation link can be opened by anyone.",
+    "privateTitle": "Password Protected",
+    "privateDescription": "The invitation can only be opened with a password.",
+    "newPassword": "New Password",
+    "changePassword": "Change Password",
+    "password": "Password",
+    "passwordSecurityNotice": "The password is already set. It is not displayed for security reasons."
+  },
+  "eventContainer": {
+    "confirmations": "Confirmations",
+    "maybe": "Maybe",
+    "rejections": "Rejections",
+    "eventCompleted": "Event Completed:",
+    "lastEventChange": "Last Event Change:",
+    "invitation": "Invitation",
+    "guests": "Guests",
+    "private": "Private",
+    "public": "Public",
+    "shareInvitation": "Share Invitation"
+  },
+  "eventContent": {
+    "addLocation": "Add Location",
+    "addEventName": "Add Event Name",
+    "eventName": "Event Name",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "confirm": "Confirm",
+    "maybe": "Maybe",
+    "decline": "Decline",
+    "addEventDescription": "Add event description...",
+    "addDescription": "Add description...",
+    "guestForm": "Guest Form",
+    "createGuestForm": "Create Guest Form"
+  },
+  "passwordPage": {
+    "title": "Enter Password",
+    "description": "You will receive the password from the organizer.",
+    "placeholder": "Password",
+    "wrongPassword": "Wrong Password",
+    "showEvent": "Show Event",
+    "unexpectedError": "An unexpected error occurred"
+  },
+  "eventPage": {
+    "notFoundTitle": "Event not found",
+    "notFoundDescription": "The requested event could not be found.",
+    "defaultTitle": "Event",
+    "defaultDescription": "Check out this event and sign up!",
+    "invitationDescription": "You have been invited to \"{eventName}\". See all details and sign up!",
+    "metadataError": "Error loading event metadata:"
+  },
+  "emailVerifiedPopup": {
+    "message": "Your email address has been confirmed."
+  },
+  "statusUpdatePopup": {
+    "errorLoadingResponses": "Error loading new responses:",
+    "errorLoadingUpdates": "Error loading status updates:",
+    "new": "new",
+    "confirmation": "confirmation",
+    "confirmations": "confirmations",
+    "response": "response",
+    "responses": "responses",
+    "for": "for",
+    "sinceLastVisit": "since you were last here.",
+    "showAll": "Show All"
+  },
+  "homePage": {
+    "noLocationSpecified": "Location not specified",
+    "untitledEvent": "Untitled Event",
+    "myEvents": "My Events",
+    "newEvent": "New Event",
+    "upcoming": "Upcoming",
+    "past": "Past"
+  },
+  "layout": {
+    "events": "Events",
+    "newEvent": "New Event"
+  },
+  "onboarding": {
+    "title": "Welcome to the Inspiration Days",
+    "subtitle": "Register with your access code",
+    "createAccount": "Create Account",
+    "createAccountDescription": "Enter your details to create your wincent AI account",
+    "alreadyRegistered": "Already registered?",
+    "loginHere": "Login here",
+    "accessCode": {
+      "label": "Access Code",
+      "placeholder": "Enter your access code",
+      "description": "Did you receive an access code? Enter it here.",
+      "validate": "Validate Access Code",
+      "valid": "Access code is valid",
+      "invalid": "Invalid access code"
+    },
+    "userDetails": {
+      "title": "Your Details",
+      "back": "Back",
+      "fullName": {
+        "label": "Full Name",
+        "placeholder": "John Doe"
+      },
+      "email": {
+        "label": "Email Address",
+        "placeholder": "john@example.com"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "At least 6 characters"
+      },
+      "confirmPassword": {
+        "label": "Confirm Password",
+        "placeholder": "Repeat password"
+      },
+      "createAccount": "Create Account"
+    },
+    "complete": {
+      "title": "Registration successful!",
+      "description": "Your account has been created. You will be redirected shortly...",
+      "redirecting": "Redirecting..."
+    },
+    "progress": {
+      "accessCode": "Access Code",
+      "data": "Details"
+    },
+    "errors": {
+      "allFieldsRequired": "All fields are required",
+      "passwordsDoNotMatch": "Passwords do not match",
+      "passwordTooShort": "Password must be at least 6 characters long",
+      "fullNameRequired": "Please enter first and last name",
+      "codeValidationError": "Error validating code",
+      "registrationError": "Error during registration",
+      "unexpectedError": "Unexpected error during registration"
+    }
+  },
+  "connections": {
+    "title": "Connections",
+    "menuItem": "Connections",
+    "connectionsPopup": "Connections"
+  },
+  "avatar": {
+    "onboarding": {
+      "step1": {
+        "title": "Let's create your own AI avatar.",
+        "subtitle": "Please enter your access code.",
+        "noCode": "No code? Apply here",
+        "accessCodeLabel": "Access Code",
+        "accessCodePlaceholder": "XJAS-PIDZ-JDL9"
+      },
+      "step2": {
+        "title": "Let's create your account now!",
+        "emailTab": "Email",
+        "phoneTab": "Phone",
+        "emailLabel": "Email",
+        "emailPlaceholder": "john.doe@email.com",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "••••••••••",
+        "confirmPasswordLabel": "Confirm Password",
+        "phoneLabel": "Phone Number",
+        "phonePlaceholder": "+1 (555) 123-4567",
+        "orContinueWith": "or continue with",
+        "continueWithApple": "Continue with Apple",
+        "continueWithFacebook": "Continue with Facebook",
+        "continueWithGoogle": "Continue with Google"
+      },
+      "step3": {
+        "title": "Upload a profile picture for your avatar.",
+        "profilePicture": "Profile Picture"
+      },
+      "step4": {
+        "title": "Looks great! You can now connect your social networks to create an avatar.",
+        "subtitle": "Why should I connect my social networks?",
+        "linkedin": "LinkedIn",
+        "twitter": "X",
+        "facebook": "Facebook"
+      },
+      "step5": {
+        "title": "Let's go deeper! Please provide files that best represent you and your knowledge.",
+        "subtitle": "Podcasts, presentations, essays, interviews...",
+        "uploadFiles": "Upload Files",
+        "dragDropText": "Click to upload or drag & drop",
+        "dragActiveText": "Drop files here",
+        "fileTypes": "PDF, DOC, TXT, Audio, Video",
+        "filesUploaded": "File(s) uploaded:",
+        "provideLinks": "Provide Links",
+        "linkPlaceholder": "https://mywebsite.com"
+      },
+      "step6": {
+        "title": "We're ready! You can now schedule your daily training calls.",
+        "subtitle": "Why do I need to schedule my training calls?",
+        "trainingSchedule": "Training Schedule",
+        "daily": "Daily",
+        "every2days": "Every 2 Days",
+        "every7days": "Every 7 Days"
+      }
+    },
+    "training": {
+      "inputMode": "Use this chat to train your avatar. You can upload new links, files, share your thoughts via voice message or text, and even start a training call.",
+      "trainingMode": "Ready for your training session! Click the phone icon below to start a live training call with your AI trainer.",
+      "listening": "I'm listening...",
+      "inputPlaceholder": "Tell me something...",
+      "startTrainingCall": "Training call starting...",
+      "sidebar": {
+        "profile": "Profile",
+        "quickActions": "Quick Actions",
+        "training": "Training",
+        "myAvatar": "My Avatar",
+        "settings": "Settings",
+        "inviteFriends": "Invite Friends"
+      },
+      "invite": {
+        "title": "Invite Friends",
+        "generateCode": "Generate Code",
+        "sendEmail": "Send Email",
+        "codeDescription": "Generate an access code that you can share with your friends. Each code can only be used once.",
+        "emailDescription": "Send an invitation directly to your friend's email address. They will automatically receive an access code via email.",
+        "emailLabel": "Email Address",
+        "emailPlaceholder": "friend@email.com",
+        "generateButton": "Generate Code",
+        "generatingButton": "Generating Code...",
+        "sendButton": "Send Invitation",
+        "sendingButton": "Sending Invitation...",
+        "codeCopied": "Code copied! Share it with your friends.",
+        "successCode": "Access code generated successfully!",
+        "successEmail": "Invitation sent successfully!",
+        "errorCode": "Error generating code",
+        "errorEmail": "Error sending invitation",
+        "errorEmailRequired": "Please enter an email address",
+        "errorCopy": "Error copying code",
+        "successCopy": "Code copied to clipboard!"
+      }
+    },
+    "common": {
+      "teechAI": "teech AI",
+      "back": "Back",
+      "next": "Next",
+      "cancel": "Cancel",
+      "save": "Save",
+      "delete": "Delete",
+      "upload": "Upload",
+      "loading": "Loading...",
+      "error": "Error",
+      "success": "Success"
+    },
+    "errors": {
+      "notAuthenticated": "User not authenticated",
+      "profileSaveError": "Error saving profile",
+      "profileLoadError": "Error loading profile",
+      "onboardingError": "Error completing onboarding",
+      "messageSaveError": "Error saving message",
+      "messageLoadError": "Error loading messages",
+      "fileUploadError": "Error uploading file",
+      "fileDeleteError": "Error deleting file",
+      "sessionCreateError": "Error creating session",
+      "fileNotFound": "File not found",
+      "noFileProvided": "No file provided"
+    }
+  }
+}
