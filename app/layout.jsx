@@ -17,8 +17,8 @@ export const metadata = {
     process.env.NEXT_PUBLIC_APP_URL || "https://mirror-in-the-sky.ai"
   ),
   title: {
-    default: "mirror-in-the-sky - Deine AI Avatar Plattform",
-    template: "%s | mirror-in-the-sky",
+    default: "MIRROR IN THE SKY",
+    template: "%s | MIRROR IN THE SKY",
   },
   description:
     "Erstelle deinen eigenen AI Avatar und interagiere mit anderen Avataren. Die Zukunft der digitalen Identität.",
