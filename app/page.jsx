@@ -1,18 +1,34 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { Play, Pause, ArrowRight } from 'lucide-react'
 
 // Verschiedene verschlüsselte Zeichen für mehr Variation
 const encryptedChars = ['█', '▓', '▒', '░', '▄', '▀', '▌', '▐', '■', '□', '▪', '▫']
 const glitchChars = ['█', '▓', '▒', '░', '▄', '▀', '▌', '▐', '■', '□', '▪', '▫', 'A', 'B', 'C', 'D', 'E', 'F', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
-// Generiere verschlüsselte Zeichen basierend auf der Wortlänge
+// Einfacher Hash-Funktion für deterministische "Zufallszahlen"
+function simpleHash(str) {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32bit integer
+  }
+  return Math.abs(hash)
+}
+
+// Generiere verschlüsselte Zeichen basierend auf der Wortlänge (deterministisch)
 function generateEncrypted(word) {
   const length = word.length
   const encrypted = []
+  const seed = simpleHash(word)
+  
   for (let i = 0; i < length; i++) {
-    const randomChar = encryptedChars[Math.floor(Math.random() * encryptedChars.length)]
-    encrypted.push(randomChar)
+    // Verwende einen deterministischen "Zufallswert" basierend auf dem Seed und der Position
+    const pseudoRandom = (seed + i * 17) % encryptedChars.length
+    const char = encryptedChars[pseudoRandom]
+    encrypted.push(char)
   }
   return encrypted.join('')
 }
@@ -145,10 +161,43 @@ function EncryptedWord({ word, isPunctuation = false }) {
 
 export default function HomePage() {
   const [inputs, setInputs] = useState(['', '', '', '', '', '', '', ''])
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [showImage, setShowImage] = useState(false)
+  const [isShaking, setIsShaking] = useState(false)
+  const audioRef = useRef(null)
+  
+  const CORRECT_ANSWER = 'ADENAUER'
   
   const text = `Aurelia, das hier ist der Beginn deines Rätsels. Die Spielregeln sind ganz einfach, denn...es gibt im Prinzip keine! Keine Tipps, nichts kann übersprungen werden.
 
 Wie lange wird es gehen? Lange. Erwarte nicht, dass du es heute lösen kannst. Auch nicht morgen...oder nächste Woche. Also lass dich überraschen. Und damit: Legen wir los!`
+
+  useEffect(() => {
+    // Cleanup beim Unmount
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+    }
+  }, [])
+
+  const togglePlayPause = () => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio('/LANDSLIDE_MITS.mp3')
+      audioRef.current.addEventListener('ended', () => {
+        setIsPlaying(false)
+      })
+    }
+
+    if (isPlaying) {
+      audioRef.current.pause()
+      setIsPlaying(false)
+    } else {
+      audioRef.current.play()
+      setIsPlaying(true)
+    }
+  }
 
   // Teile den Text in Wörter und Zeichen auf
   function parseText(text) {
@@ -196,12 +245,72 @@ Wie lange wird es gehen? Lange. Erwarte nicht, dass du es heute lösen kannst. A
         prevInput.focus()
       }
     }
+    // Enter: Bestätigen, wenn alle Felder ausgefüllt sind
+    if (e.key === 'Enter' && inputs.every(input => input !== '')) {
+      handleSubmit()
+    }
   }
+
+  const handleSubmit = () => {
+    const answer = inputs.join('')
+    
+    if (answer === CORRECT_ANSWER) {
+      // Korrekt: Alles ausblenden und Bild anzeigen
+      setShowImage(true)
+    } else {
+      // Falsch: Wackel-Animation
+      setIsShaking(true)
+      setTimeout(() => {
+        setIsShaking(false)
+      }, 600)
+    }
+  }
+
+  const allFieldsFilled = inputs.every(input => input !== '')
 
   const parts = parseText(text)
 
+  // Wenn das Bild angezeigt werden soll, zeige nur das Bild
+  if (showImage) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+        <div className="flex items-center gap-6 sm:gap-8 md:gap-12">
+          {/* Koordinaten links */}
+          <div className="text-white text-lg sm:text-xl md:text-2xl font-mono font-bold whitespace-nowrap">
+            48°23&apos;20.3&quot;N
+          </div>
+          
+          {/* Bild */}
+          <img 
+            src="/ADENAUER.png" 
+            alt="ADENAUER" 
+            className="max-w-full max-h-[90vh] object-contain"
+          />
+          
+          {/* Koordinaten rechts */}
+          <div className="text-white text-lg sm:text-xl md:text-2xl font-mono font-bold whitespace-nowrap">
+            9°59&apos;09.7&quot;E
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+    <div className="min-h-screen bg-black flex items-center justify-center px-4 relative">
+      {/* Play/Pause Button oben */}
+      <button
+        onClick={togglePlayPause}
+        className="absolute top-16 left-1/2 transform -translate-x-1/2 w-14 h-14 rounded-full border-2 border-white text-white hover:bg-white hover:text-black transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 z-50 group"
+        aria-label={isPlaying ? 'Pause' : 'Play'}
+      >
+        {isPlaying ? (
+          <Pause size={24} fill="currentColor" />
+        ) : (
+          <Play size={24} fill="currentColor" className="ml-1" />
+        )}
+      </button>
+      
       <div className="text-center max-w-4xl mx-auto">
         <div className="text-white text-lg sm:text-xl md:text-2xl leading-relaxed mb-12">
           {parts.map((part, index) => {
@@ -231,7 +340,11 @@ Wie lange wird es gehen? Lange. Erwarte nicht, dass du es heute lösen kannst. A
               onChange={(e) => handleInputChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               maxLength={1}
-              className="w-12 h-12 sm:w-14 sm:h-14 text-center text-white bg-transparent border-2 border-white rounded-md focus:outline-none focus:border-white focus:ring-2 focus:ring-white focus:ring-opacity-50 text-xl sm:text-2xl font-mono uppercase"
+              className={`w-12 h-12 sm:w-14 sm:h-14 text-center text-white bg-transparent border-2 rounded-md focus:outline-none focus:ring-2 focus:ring-opacity-50 text-xl sm:text-2xl font-mono uppercase transition-all duration-200 ${
+                isShaking 
+                  ? 'border-red-500 animate-shake' 
+                  : 'border-white focus:border-white focus:ring-white'
+              }`}
               style={{
                 fontFamily: 'monospace',
                 letterSpacing: '0.1em',
@@ -239,7 +352,34 @@ Wie lange wird es gehen? Lange. Erwarte nicht, dass du es heute lösen kannst. A
             />
           ))}
         </div>
+
+        {/* Bestätigungsbutton - immer gerendert, aber unsichtbar wenn nicht alle Felder ausgefüllt */}
+        <div className="mt-8 h-12 flex items-center justify-center">
+          <button
+            onClick={handleSubmit}
+            className={`w-14 h-14 rounded-full border-2 border-white text-white hover:bg-white hover:text-black transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 ${
+              allFieldsFilled 
+                ? 'opacity-100 pointer-events-auto' 
+                : 'opacity-0 pointer-events-none'
+            }`}
+            disabled={!allFieldsFilled}
+          >
+            <ArrowRight size={24} fill="currentColor" />
+          </button>
+        </div>
       </div>
+
+      {/* Wackel-Animation CSS */}
+      <style jsx>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+          20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .animate-shake {
+          animation: shake 0.5s ease-in-out;
+        }
+      `}</style>
     </div>
   )
 }
