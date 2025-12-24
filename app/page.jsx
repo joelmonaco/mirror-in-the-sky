@@ -274,21 +274,27 @@ Wie lange wird es gehen? Lange. Erwarte nicht, dass du es heute lösen kannst. A
   if (showImage) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center px-4">
-        <div className="flex items-center gap-6 sm:gap-8 md:gap-12">
-          {/* Koordinaten links */}
-          <div className="text-white text-lg sm:text-xl md:text-2xl font-mono font-bold whitespace-nowrap">
-            48°23&apos;20.3&quot;N
+        <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 lg:gap-8 xl:gap-12">
+          {/* Koordinaten - auf Mobile/Tablet über dem Bild, auf Desktop links */}
+          <div className="flex flex-col md:flex-row items-center gap-2 md:gap-6 lg:gap-8 xl:gap-12 order-1 md:order-1">
+            <div className="text-white text-lg sm:text-xl md:text-2xl font-mono font-bold whitespace-nowrap">
+              48°23&apos;20.3&quot;N
+            </div>
+            {/* Auf Mobile/Tablet: zweite Koordinate unter der ersten */}
+            <div className="md:hidden text-white text-lg sm:text-xl font-mono font-bold whitespace-nowrap">
+              9°59&apos;09.7&quot;E
+            </div>
           </div>
           
           {/* Bild */}
           <img 
             src="/ADENAUER.png" 
             alt="ADENAUER" 
-            className="max-w-full max-h-[90vh] object-contain"
+            className="max-w-full max-h-[90vh] object-contain order-2 md:order-2"
           />
           
-          {/* Koordinaten rechts */}
-          <div className="text-white text-lg sm:text-xl md:text-2xl font-mono font-bold whitespace-nowrap">
+          {/* Koordinaten rechts - nur auf Desktop sichtbar */}
+          <div className="hidden md:block text-white text-lg sm:text-xl md:text-2xl font-mono font-bold whitespace-nowrap order-3">
             9°59&apos;09.7&quot;E
           </div>
         </div>
