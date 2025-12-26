@@ -1515,6 +1515,7 @@ export default function LepusAlbusPage() {
   const [inputs, setInputs] = useState(['', '', '', '', '', ''])
   const [showSuccess, setShowSuccess] = useState(false)
   const [isShaking, setIsShaking] = useState(false)
+  const [isCorrectInput, setIsCorrectInput] = useState([false, false, false, false, false, false])
   
   const CORRECT_ANSWER = ['+', '#', '!', '&', '+', ':)']
   
@@ -1549,6 +1550,11 @@ export default function LepusAlbusPage() {
     const newInputs = [...inputs]
     newInputs[index] = filteredValue
     setInputs(newInputs)
+
+    // Prüfe ob die Eingabe korrekt ist
+    const newIsCorrectInput = [...isCorrectInput]
+    newIsCorrectInput[index] = filteredValue === CORRECT_ANSWER[index]
+    setIsCorrectInput(newIsCorrectInput)
 
     // Automatisch zum nächsten Feld springen, wenn ein Zeichen eingegeben wurde (außer beim letzten Feld)
     if (filteredValue && index < 5) {
@@ -1634,7 +1640,9 @@ export default function LepusAlbusPage() {
               } h-12 sm:h-14 text-center text-white bg-transparent border-2 rounded-md focus:outline-none focus:ring-2 focus:ring-opacity-50 text-xl sm:text-2xl font-mono transition-all duration-200 ${
                 isShaking 
                   ? 'border-red-500 animate-shake' 
-                  : 'border-white focus:border-white focus:ring-white'
+                  : (isCorrectInput[index] 
+                      ? 'border-green-500 bg-green-500/20 focus:border-green-500 focus:ring-green-500' 
+                      : 'border-white focus:border-white focus:ring-white')
               }`}
               style={{
                 fontFamily: 'monospace',
