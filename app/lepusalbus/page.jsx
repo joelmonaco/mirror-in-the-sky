@@ -1104,7 +1104,7 @@ function JumpAndRunGame() {
         
         // Congratulations text
         ctx.font = 'bold 36px monospace'
-        const winText = 'GEWONNEN!'
+        const winText = 'DU HAST ES GESCHAFFT!'
         const winWidth = ctx.measureText(winText).width
         ctx.strokeText(winText, canvas.width / 2 - winWidth / 2, canvas.height / 2 - 80)
         ctx.fillText(winText, canvas.width / 2 - winWidth / 2, canvas.height / 2 - 80)
@@ -1246,10 +1246,13 @@ function JumpAndRunGame() {
                 <span className="font-bold text-green-300">💎 Punkte sammeln:</span> Springe über Hürden und sammle Diamanten.
               </p>
               <p>
-                <span className="font-bold text-blue-300">🦸‍♀️ Aurelia (Du):</span> Berührst du eine Hürde = Game Over!
+                <span className="font-bold text-blue-300">🦸‍♀️ Aurelia:</span> Berührst du eine Hürde = Game Over!
               </p>
               <p>
-                <span className="font-bold text-pink-300">🐕 Amy (Hund):</span> Sie darf Hürden berühren - kein Problem!
+                <span className="font-bold text-pink-300">🐕 Amy:</span> Sie darf Hürden berühren - kein Problem!
+              </p>
+              <p className="mt-4 pt-4 border-t-2 border-white">
+                <span className="font-bold text-orange-300">💻 Wichtig:</span> Bitte spiele dieses Spiel unbedingt auf einem Laptop!
               </p>
             </div>
           </div>
@@ -1282,8 +1285,8 @@ function JumpAndRunGame() {
           </button>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-6">
-          <div className="relative">
+        <div className="flex flex-col items-center gap-6 w-full px-4">
+          <div className="relative w-full max-w-5xl">
             {/* Music Control Button - Top Right */}
             <div className="absolute top-2 right-2 z-10">
               {/* Mute/Unmute Button */}
@@ -1316,13 +1319,49 @@ function JumpAndRunGame() {
               }}
             />
           </div>
-          <div className="text-2xl font-mono font-bold px-6 py-3 rounded-lg" style={{
+          
+          {/* Desktop Info (nur auf großen Laptops/Desktops) */}
+          <div className="hidden lg:block text-2xl font-mono font-bold px-6 py-3 rounded-lg" style={{
             background: '#000000',
             color: '#ffffff',
             border: '4px solid #ffffff',
             boxShadow: '0 4px 8px rgba(0,0,0,0.5)'
           }}>
             💎 Score: {score} | ⬆️ LEERTASTE zum Springen
+          </div>
+          
+          {/* Mobile/Tablet/iPad Jump Button */}
+          <div className="block lg:hidden w-full max-w-md">
+            <button
+              onClick={() => {
+                // Trigger jump via code
+                const spaceEvent = new KeyboardEvent('keydown', { code: 'Space' })
+                window.dispatchEvent(spaceEvent)
+              }}
+              onTouchStart={(e) => {
+                e.preventDefault()
+                const spaceEvent = new KeyboardEvent('keydown', { code: 'Space' })
+                window.dispatchEvent(spaceEvent)
+              }}
+              className="w-full py-8 text-4xl font-mono font-bold rounded-lg transition-all duration-200 active:scale-95"
+              style={{
+                background: 'linear-gradient(180deg, #00d400 0%, #00a800 100%)',
+                color: '#ffffff',
+                border: '6px solid #006400',
+                boxShadow: '0 8px 0 #006400, 0 12px 16px rgba(0,0,0,0.5)',
+                textShadow: '3px 3px 0px #006400',
+                touchAction: 'manipulation'
+              }}
+            >
+              ⬆️ JUMP ⬆️
+            </button>
+            <div className="text-center text-xl font-mono font-bold mt-4 px-4 py-2 rounded" style={{
+              background: 'rgba(0,0,0,0.7)',
+              color: '#ffffff',
+              textShadow: '1px 1px 0px #000000'
+            }}>
+              💎 Score: {score}
+            </div>
           </div>
         </div>
       )}
