@@ -1166,26 +1166,6 @@ function JumpAndRunGame() {
         ctx.fillText(restartText, canvas.width / 2 - restartWidth / 2, canvas.height / 2 + 50)
       }
       
-      // Draw pause overlay
-      if (isPaused && !gameOver && !showingCoordinates) {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'
-        ctx.fillRect(0, 0, canvas.width, canvas.height)
-        
-        ctx.fillStyle = '#ffffff'
-        ctx.strokeStyle = '#000000'
-        ctx.lineWidth = 4
-        ctx.font = 'bold 56px monospace'
-        const pauseText = 'PAUSE'
-        const pauseWidth = ctx.measureText(pauseText).width
-        ctx.strokeText(pauseText, canvas.width / 2 - pauseWidth / 2, canvas.height / 2 - 20)
-        ctx.fillText(pauseText, canvas.width / 2 - pauseWidth / 2, canvas.height / 2 - 20)
-        
-        ctx.font = 'bold 24px monospace'
-        const resumeText = 'Klicke auf ▶️ zum Weiterspielen'
-        const resumeWidth = ctx.measureText(resumeText).width
-        ctx.strokeText(resumeText, canvas.width / 2 - resumeWidth / 2, canvas.height / 2 + 40)
-        ctx.fillText(resumeText, canvas.width / 2 - resumeWidth / 2, canvas.height / 2 + 40)
-      }
       
       animationId = requestAnimationFrame(gameLoop)
     }
@@ -1304,8 +1284,8 @@ function JumpAndRunGame() {
       ) : (
         <div className="flex flex-col items-center gap-6">
           <div className="relative">
-            {/* Control Buttons - Top Right */}
-            <div className="absolute top-2 right-2 flex gap-2 z-10">
+            {/* Music Control Button - Top Right */}
+            <div className="absolute top-2 right-2 z-10">
               {/* Mute/Unmute Button */}
               <button
                 onClick={() => setIsMusicMuted(!isMusicMuted)}
@@ -1320,22 +1300,6 @@ function JumpAndRunGame() {
                 title={isMusicMuted ? 'Musik einschalten' : 'Musik ausschalten'}
               >
                 {isMusicMuted ? '🔇' : '🔊'}
-              </button>
-              
-              {/* Pause Button */}
-              <button
-                onClick={() => setIsPaused(!isPaused)}
-                className="w-12 h-12 rounded-lg font-bold transition-all duration-200 transform hover:scale-110"
-                style={{
-                  background: '#ffcc00',
-                  color: '#000000',
-                  border: '3px solid #000000',
-                  boxShadow: '0 4px 0 #000000',
-                  fontSize: '20px'
-                }}
-                title={isPaused ? 'Weiterspielen' : 'Pause'}
-              >
-                {isPaused ? '▶️' : '⏸️'}
               </button>
             </div>
             
