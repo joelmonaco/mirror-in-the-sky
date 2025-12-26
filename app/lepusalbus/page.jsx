@@ -1558,11 +1558,6 @@ export default function LepusAlbusPage() {
       }
     }
   }
-  
-  // Prüfe ob ein einzelnes Feld korrekt ist
-  const isFieldCorrect = (index) => {
-    return inputs[index] && inputs[index] === CORRECT_ANSWER[index]
-  }
 
   const handleKeyDown = (index, e) => {
     // Backspace: Gehe zum vorherigen Feld, wenn aktuelles Feld leer ist
@@ -1639,8 +1634,6 @@ export default function LepusAlbusPage() {
               } h-12 sm:h-14 text-center text-white bg-transparent border-2 rounded-md focus:outline-none focus:ring-2 focus:ring-opacity-50 text-xl sm:text-2xl font-mono transition-all duration-200 ${
                 isShaking 
                   ? 'border-red-500 animate-shake' 
-                  : isFieldCorrect(index)
-                  ? 'border-green-500 bg-green-500 bg-opacity-20 focus:border-green-500 focus:ring-green-500'
                   : 'border-white focus:border-white focus:ring-white'
               }`}
               style={{
