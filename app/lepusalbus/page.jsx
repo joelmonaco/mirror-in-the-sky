@@ -39,6 +39,14 @@ function JumpAndRunGame() {
   const [score, setScore] = useState(0)
   const [gameOver, setGameOver] = useState(false)
   const [gameStarted, setGameStarted] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
+  const [isMusicMuted, setIsMusicMuted] = useState(false)
+  
+  // Audio refs
+  const soundtrackRef = useRef(null)
+  const jumpSoundRef = useRef(null)
+  const gameOverSoundRef = useRef(null)
+  const coinSoundRef = useRef(null)
   
   useEffect(() => {
     if (!gameStarted) return
@@ -50,43 +58,140 @@ function JumpAndRunGame() {
     
     // Game variables
     const player = {
-      x: 80,
-      y: 280,
-      width: 32,
-      height: 48,
+      x: 120,
+      y: 330,
+      width: 48,
+      height: 72,
       velocityY: 0,
       jumping: false,
-      gravity: 0.8,
-      jumpPower: -15
+      gravity: 1.0,
+      jumpPower: -16.5
+    }
+    
+    const dog = {
+      x: 50,
+      y: 360,
+      width: 32,
+      height: 24,
+      velocityY: 0,
+      jumping: false,
+      offsetX: -60
     }
     
     const obstacles = []
+    const gaps = [] // Holes in the ground
+    const diamonds = []
+    const confetti = []
     const clouds = []
     let obstacleTimer = 0
     let cloudTimer = 0
+    let gapTimer = 0
+    let diamondTimer = 0
     let gameScore = 0
     let animationId
     let frameCount = 0
+    let gameWon = false
+    let showingCoordinates = false
+    let confettiTimer = 0
+    let lastObstacleX = -500 // Track last obstacle position
+    let lastGapX = -500 // Track last gap position
     
     // Ground level
-    const groundY = 350
+    const groundY = 450
+    
+    // Get sky colors based on score
+    function getSkyColors(score) {
+      if (score < 500) {
+        // Day sky (blue)
+        return {
+          skyTop: '#5c94fc',
+          skyMiddle: '#7eabfc',
+          skyBottom: '#a4c8fc',
+          cloud: '#ffffff'
+        }
+      } else if (score < 750) {
+        // Sunset transition (500-750)
+        const progress = (score - 500) / 250 // 0 to 1
+        
+        // Interpolate from day to sunset
+        const dayTop = { r: 92, g: 148, b: 252 }
+        const sunsetTop = { r: 255, g: 107, b: 53 }
+        const dayMiddle = { r: 126, g: 171, b: 252 }
+        const sunsetMiddle = { r: 255, g: 154, b: 86 }
+        const dayBottom = { r: 164, g: 200, b: 252 }
+        const sunsetBottom = { r: 255, g: 214, b: 165 }
+        
+        const topR = Math.floor(dayTop.r + (sunsetTop.r - dayTop.r) * progress)
+        const topG = Math.floor(dayTop.g + (sunsetTop.g - dayTop.g) * progress)
+        const topB = Math.floor(dayTop.b + (sunsetTop.b - dayTop.b) * progress)
+        
+        const midR = Math.floor(dayMiddle.r + (sunsetMiddle.r - dayMiddle.r) * progress)
+        const midG = Math.floor(dayMiddle.g + (sunsetMiddle.g - dayMiddle.g) * progress)
+        const midB = Math.floor(dayMiddle.b + (sunsetMiddle.b - dayMiddle.b) * progress)
+        
+        const botR = Math.floor(dayBottom.r + (sunsetBottom.r - dayBottom.r) * progress)
+        const botG = Math.floor(dayBottom.g + (sunsetBottom.g - dayBottom.g) * progress)
+        const botB = Math.floor(dayBottom.b + (sunsetBottom.b - dayBottom.b) * progress)
+        
+        return {
+          skyTop: `rgb(${topR}, ${topG}, ${topB})`,
+          skyMiddle: `rgb(${midR}, ${midG}, ${midB})`,
+          skyBottom: `rgb(${botR}, ${botG}, ${botB})`,
+          cloud: '#ffeaa7' // Golden clouds
+        }
+      } else {
+        // Night sky transition (750+)
+        const progress = Math.min((score - 750) / 250, 1) // 0 to 1, capped at 1
+        
+        // Interpolate from sunset to night
+        const sunsetTop = { r: 255, g: 107, b: 53 }
+        const nightTop = { r: 10, g: 10, b: 40 }
+        const sunsetMiddle = { r: 255, g: 154, b: 86 }
+        const nightMiddle = { r: 20, g: 20, b: 60 }
+        const sunsetBottom = { r: 255, g: 214, b: 165 }
+        const nightBottom = { r: 40, g: 40, b: 80 }
+        
+        const topR = Math.floor(sunsetTop.r + (nightTop.r - sunsetTop.r) * progress)
+        const topG = Math.floor(sunsetTop.g + (nightTop.g - sunsetTop.g) * progress)
+        const topB = Math.floor(sunsetTop.b + (nightTop.b - sunsetTop.b) * progress)
+        
+        const midR = Math.floor(sunsetMiddle.r + (nightMiddle.r - sunsetMiddle.r) * progress)
+        const midG = Math.floor(sunsetMiddle.g + (nightMiddle.g - sunsetMiddle.g) * progress)
+        const midB = Math.floor(sunsetMiddle.b + (nightMiddle.b - sunsetMiddle.b) * progress)
+        
+        const botR = Math.floor(sunsetBottom.r + (nightBottom.r - sunsetBottom.r) * progress)
+        const botG = Math.floor(sunsetBottom.g + (nightBottom.g - sunsetBottom.g) * progress)
+        const botB = Math.floor(sunsetBottom.b + (nightBottom.b - sunsetBottom.b) * progress)
+        
+        return {
+          skyTop: `rgb(${topR}, ${topG}, ${topB})`,
+          skyMiddle: `rgb(${midR}, ${midG}, ${midB})`,
+          skyBottom: `rgb(${botR}, ${botG}, ${botB})`,
+          cloud: progress > 0.5 ? '#555577' : '#aa9988' // Darker clouds at night
+        }
+      }
+    }
     
     // Nintendo Color Palette
     const colors = {
-      sky: '#5c94fc',
       ground: '#8b5524',
       grass: '#00a800',
       brick: '#e39d3e',
-      cloud: '#ffffff',
       skin: '#ffcca1',
       hair: '#ffd700',
-      dress: '#ff69b4',
-      shoes: '#8b4513'
+      shirt: '#0066ff',
+      logo: '#ff0000',
+      logoYellow: '#ffcc00',
+      pants: '#0033aa',
+      shoes: '#8b4513',
+      eyes: '#6b8e7d',
+      lips: '#c75b7a',
+      dogNose: '#d4a574'
     }
     
     // Draw pixel girl character with animations
     function drawGirl(x, y, isJumping, frame) {
-      const pixelSize = 4
+      const pixelSize = 6
       
       // Add rotation when jumping (like Mario)
       if (isJumping) {
@@ -108,17 +213,45 @@ function JumpAndRunGame() {
         ctx.fillStyle = colors.skin
         ctx.fillRect(x + pixelSize * 2, y + pixelSize * 3, pixelSize * 4, pixelSize * 3)
         
-        // Eyes (excited)
+        // Eyes (excited) - green/grey, closer together
+        ctx.fillStyle = colors.eyes
+        ctx.fillRect(x + pixelSize * 2.5, y + pixelSize * 4, pixelSize, pixelSize)
+        ctx.fillRect(x + pixelSize * 4.5, y + pixelSize * 4, pixelSize, pixelSize)
+        
+        // Pupils (black dots in eyes)
         ctx.fillStyle = '#000000'
-        ctx.fillRect(x + pixelSize * 2, y + pixelSize * 4, pixelSize, pixelSize)
-        ctx.fillRect(x + pixelSize * 5, y + pixelSize * 4, pixelSize, pixelSize)
+        ctx.fillRect(x + pixelSize * 2.8, y + pixelSize * 4.3, pixelSize * 0.4, pixelSize * 0.4)
+        ctx.fillRect(x + pixelSize * 4.8, y + pixelSize * 4.3, pixelSize * 0.4, pixelSize * 0.4)
         
-        // Open mouth (excited)
-        ctx.fillRect(x + pixelSize * 3, y + pixelSize * 5, pixelSize * 2, pixelSize)
+        // Lips (dark pink)
+        ctx.fillStyle = colors.lips
+        ctx.fillRect(x + pixelSize * 3, y + pixelSize * 5.5, pixelSize * 2, pixelSize * 0.5)
         
-        // Dress/Body
-        ctx.fillStyle = colors.dress
+        // Blue T-Shirt
+        ctx.fillStyle = colors.shirt
         ctx.fillRect(x + pixelSize, y + pixelSize * 6, pixelSize * 6, pixelSize * 4)
+        
+        // Superman-style Logo background (shield shape)
+        ctx.fillStyle = colors.logo
+        // Shield/pentagon shape - larger and more visible
+        ctx.fillRect(x + pixelSize * 2.5, y + pixelSize * 7, pixelSize * 3, pixelSize * 0.8)
+        ctx.fillRect(x + pixelSize * 2, y + pixelSize * 7.8, pixelSize * 4, pixelSize * 1.2)
+        ctx.fillRect(x + pixelSize * 2.5, y + pixelSize * 9, pixelSize * 3, pixelSize * 0.8)
+        
+        // Letter "A" in the logo - clear and bold
+        ctx.fillStyle = colors.logoYellow
+        // Left side of A
+        ctx.fillRect(x + pixelSize * 2.8, y + pixelSize * 7.5, pixelSize * 0.7, pixelSize * 2)
+        // Right side of A
+        ctx.fillRect(x + pixelSize * 4.5, y + pixelSize * 7.5, pixelSize * 0.7, pixelSize * 2)
+        // Top of A
+        ctx.fillRect(x + pixelSize * 3.5, y + pixelSize * 7.5, pixelSize, pixelSize * 0.6)
+        // Crossbar of A (middle bar)
+        ctx.fillRect(x + pixelSize * 2.8, y + pixelSize * 8.5, pixelSize * 2.4, pixelSize * 0.5)
+        
+        // Pants/Shorts
+        ctx.fillStyle = colors.pants
+        ctx.fillRect(x + pixelSize, y + pixelSize * 10, pixelSize * 6, pixelSize)
         
         // Arms UP (jumping pose)
         ctx.fillStyle = colors.skin
@@ -147,17 +280,45 @@ function JumpAndRunGame() {
         ctx.fillStyle = colors.skin
         ctx.fillRect(x + pixelSize * 2, y + pixelSize * 3, pixelSize * 4, pixelSize * 3)
         
-        // Eyes
+        // Eyes - green/grey, closer together
+        ctx.fillStyle = colors.eyes
+        ctx.fillRect(x + pixelSize * 2.5, y + pixelSize * 4, pixelSize, pixelSize)
+        ctx.fillRect(x + pixelSize * 4.5, y + pixelSize * 4, pixelSize, pixelSize)
+        
+        // Pupils (black dots in eyes)
         ctx.fillStyle = '#000000'
-        ctx.fillRect(x + pixelSize * 2, y + pixelSize * 4, pixelSize, pixelSize)
-        ctx.fillRect(x + pixelSize * 5, y + pixelSize * 4, pixelSize, pixelSize)
+        ctx.fillRect(x + pixelSize * 2.8, y + pixelSize * 4.3, pixelSize * 0.4, pixelSize * 0.4)
+        ctx.fillRect(x + pixelSize * 4.8, y + pixelSize * 4.3, pixelSize * 0.4, pixelSize * 0.4)
         
-        // Smile
-        ctx.fillRect(x + pixelSize * 3, y + pixelSize * 5, pixelSize * 2, pixelSize)
+        // Lips (dark pink)
+        ctx.fillStyle = colors.lips
+        ctx.fillRect(x + pixelSize * 3, y + pixelSize * 5.5, pixelSize * 2, pixelSize * 0.5)
         
-        // Dress/Body
-        ctx.fillStyle = colors.dress
+        // Blue T-Shirt
+        ctx.fillStyle = colors.shirt
         ctx.fillRect(x + pixelSize, y + pixelSize * 6, pixelSize * 6, pixelSize * 4)
+        
+        // Superman-style Logo background (shield shape)
+        ctx.fillStyle = colors.logo
+        // Shield/pentagon shape - larger and more visible
+        ctx.fillRect(x + pixelSize * 2.5, y + pixelSize * 7, pixelSize * 3, pixelSize * 0.8)
+        ctx.fillRect(x + pixelSize * 2, y + pixelSize * 7.8, pixelSize * 4, pixelSize * 1.2)
+        ctx.fillRect(x + pixelSize * 2.5, y + pixelSize * 9, pixelSize * 3, pixelSize * 0.8)
+        
+        // Letter "A" in the logo - clear and bold
+        ctx.fillStyle = colors.logoYellow
+        // Left side of A
+        ctx.fillRect(x + pixelSize * 2.8, y + pixelSize * 7.5, pixelSize * 0.7, pixelSize * 2)
+        // Right side of A
+        ctx.fillRect(x + pixelSize * 4.5, y + pixelSize * 7.5, pixelSize * 0.7, pixelSize * 2)
+        // Top of A
+        ctx.fillRect(x + pixelSize * 3.5, y + pixelSize * 7.5, pixelSize, pixelSize * 0.6)
+        // Crossbar of A (middle bar)
+        ctx.fillRect(x + pixelSize * 2.8, y + pixelSize * 8.5, pixelSize * 2.4, pixelSize * 0.5)
+        
+        // Pants/Shorts
+        ctx.fillStyle = colors.pants
+        ctx.fillRect(x + pixelSize, y + pixelSize * 10, pixelSize * 6, pixelSize)
         
         // Arms swing while running
         ctx.fillStyle = colors.skin
@@ -200,6 +361,93 @@ function JumpAndRunGame() {
       }
     }
     
+    // Draw white dog character
+    function drawDog(x, y, isJumping, frame) {
+      const pixelSize = 4
+      
+      if (isJumping) {
+        // Jumping pose - legs together, ears up
+        // Body (white)
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(x + pixelSize, y + pixelSize * 2, pixelSize * 6, pixelSize * 3)
+        
+        // Head
+        ctx.fillRect(x + pixelSize * 5, y, pixelSize * 3, pixelSize * 3)
+        
+        // Ears (up when jumping)
+        ctx.fillRect(x + pixelSize * 5, y - pixelSize, pixelSize, pixelSize)
+        ctx.fillRect(x + pixelSize * 7, y - pixelSize, pixelSize, pixelSize)
+        
+        // Snout
+        ctx.fillStyle = '#ffcca1'
+        ctx.fillRect(x + pixelSize * 7, y + pixelSize, pixelSize * 2, pixelSize * 2)
+        
+        // Nose (light brown)
+        ctx.fillStyle = colors.dogNose
+        ctx.fillRect(x + pixelSize * 8, y + pixelSize, pixelSize, pixelSize)
+        
+        // Eyes
+        ctx.fillStyle = '#000000'
+        ctx.fillRect(x + pixelSize * 5, y + pixelSize, pixelSize, pixelSize)
+        ctx.fillRect(x + pixelSize * 7, y + pixelSize, pixelSize, pixelSize)
+        
+        // Legs together (jumping)
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(x + pixelSize * 2, y + pixelSize * 5, pixelSize * 2, pixelSize)
+        ctx.fillRect(x + pixelSize * 4, y + pixelSize * 5, pixelSize * 2, pixelSize)
+        
+        // Tail up
+        ctx.fillRect(x, y + pixelSize, pixelSize * 2, pixelSize * 2)
+        
+      } else {
+        // Running animation
+        const runFrame = Math.floor(frame / 8) % 2
+        
+        // Body (white)
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(x + pixelSize, y + pixelSize * 2, pixelSize * 6, pixelSize * 3)
+        
+        // Head
+        ctx.fillRect(x + pixelSize * 5, y, pixelSize * 3, pixelSize * 3)
+        
+        // Ears (floppy)
+        ctx.fillRect(x + pixelSize * 5, y + pixelSize, pixelSize, pixelSize * 2)
+        ctx.fillRect(x + pixelSize * 7, y + pixelSize, pixelSize, pixelSize * 2)
+        
+        // Snout
+        ctx.fillStyle = '#ffcca1'
+        ctx.fillRect(x + pixelSize * 7, y + pixelSize, pixelSize * 2, pixelSize * 2)
+        
+        // Nose (light brown)
+        ctx.fillStyle = colors.dogNose
+        ctx.fillRect(x + pixelSize * 8, y + pixelSize, pixelSize, pixelSize)
+        
+        // Eyes
+        ctx.fillStyle = '#000000'
+        ctx.fillRect(x + pixelSize * 5, y + pixelSize, pixelSize, pixelSize)
+        ctx.fillRect(x + pixelSize * 7, y + pixelSize, pixelSize, pixelSize)
+        
+        // Legs - running animation
+        ctx.fillStyle = '#ffffff'
+        if (runFrame === 0) {
+          // Frame 1: Left legs forward
+          ctx.fillRect(x + pixelSize * 2, y + pixelSize * 5, pixelSize, pixelSize)
+          ctx.fillRect(x + pixelSize * 5, y + pixelSize * 5, pixelSize, pixelSize)
+        } else {
+          // Frame 2: Right legs forward
+          ctx.fillRect(x + pixelSize * 3, y + pixelSize * 5, pixelSize, pixelSize)
+          ctx.fillRect(x + pixelSize * 4, y + pixelSize * 5, pixelSize, pixelSize)
+        }
+        
+        // Tail wagging
+        if (runFrame === 0) {
+          ctx.fillRect(x, y + pixelSize * 2, pixelSize * 2, pixelSize)
+        } else {
+          ctx.fillRect(x, y + pixelSize * 3, pixelSize * 2, pixelSize)
+        }
+      }
+    }
+    
     // Draw brick obstacle (like Mario pipes/blocks)
     function drawBrick(x, y, width, height) {
       const brickSize = 16
@@ -217,16 +465,128 @@ function JumpAndRunGame() {
     }
     
     // Draw cloud
-    function drawCloud(x, y) {
-      ctx.fillStyle = colors.cloud
+    function drawCloud(x, y, cloudColor) {
+      ctx.fillStyle = cloudColor
       ctx.fillRect(x + 8, y, 32, 16)
       ctx.fillRect(x, y + 8, 48, 16)
       ctx.fillRect(x + 8, y + 16, 32, 8)
     }
     
-    // Spawn obstacle
+    // Draw diamond collectible
+    function drawDiamond(x, y, frame) {
+      const size = 24
+      const bounce = Math.sin(frame * 0.1) * 5
+      const actualY = y + bounce
+      
+      // Outer diamond (cyan/turquoise)
+      ctx.fillStyle = '#00d4ff'
+      ctx.beginPath()
+      ctx.moveTo(x + size / 2, actualY)
+      ctx.lineTo(x + size, actualY + size / 2)
+      ctx.lineTo(x + size / 2, actualY + size)
+      ctx.lineTo(x, actualY + size / 2)
+      ctx.closePath()
+      ctx.fill()
+      
+      // Inner sparkle (bright cyan)
+      ctx.fillStyle = '#7fffd4'
+      ctx.beginPath()
+      ctx.moveTo(x + size / 2, actualY + size / 3)
+      ctx.lineTo(x + size * 0.65, actualY + size / 2)
+      ctx.lineTo(x + size / 2, actualY + size * 0.7)
+      ctx.lineTo(x + size * 0.35, actualY + size / 2)
+      ctx.closePath()
+      ctx.fill()
+      
+      // Sparkle effect
+      if (frame % 20 < 10) {
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(x - 4, actualY + size / 2 - 1, 3, 3)
+        ctx.fillRect(x + size + 2, actualY + size / 2 - 1, 3, 3)
+        ctx.fillRect(x + size / 2 - 1, actualY - 4, 3, 3)
+        ctx.fillRect(x + size / 2 - 1, actualY + size + 2, 3, 3)
+      }
+    }
+    
+    // Draw gap/hole in ground
+    function drawGap(x, width) {
+      // Black void/abyss
+      ctx.fillStyle = '#000000'
+      ctx.fillRect(x, groundY, width, 50)
+      
+      // Yellow/Black warning stripes on LEFT edge (diagonal pattern)
+      ctx.fillStyle = '#ffff00'
+      for (let i = 0; i < 50; i += 8) {
+        ctx.fillRect(x - 8, groundY + i, 8, 4)
+      }
+      ctx.fillStyle = '#000000'
+      for (let i = 0; i < 50; i += 8) {
+        ctx.fillRect(x - 8, groundY + i + 4, 8, 4)
+      }
+      
+      // Yellow/Black warning stripes on RIGHT edge
+      ctx.fillStyle = '#ffff00'
+      for (let i = 0; i < 50; i += 8) {
+        ctx.fillRect(x + width, groundY + i, 8, 4)
+      }
+      ctx.fillStyle = '#000000'
+      for (let i = 0; i < 50; i += 8) {
+        ctx.fillRect(x + width, groundY + i + 4, 8, 4)
+      }
+      
+      // Red danger border around the gap
+      ctx.strokeStyle = '#ff0000'
+      ctx.lineWidth = 3
+      ctx.strokeRect(x, groundY, width, 5)
+      
+      // Draw some depth lines in the hole
+      ctx.strokeStyle = '#333333'
+      ctx.lineWidth = 1
+      for (let i = 0; i < width; i += 10) {
+        ctx.beginPath()
+        ctx.moveTo(x + i, groundY)
+        ctx.lineTo(x + i, groundY + 50)
+        ctx.stroke()
+      }
+    }
+    
+    // Draw confetti particle
+    function drawConfetti(particle) {
+      ctx.fillStyle = particle.color
+      ctx.save()
+      ctx.translate(particle.x, particle.y)
+      ctx.rotate(particle.rotation)
+      ctx.fillRect(-4, -4, 8, 8)
+      ctx.restore()
+    }
+    
+    // Check if area is clear for spawning
+    function isAreaClear(x, minDistance) {
+      // Check all existing obstacles
+      for (let obstacle of obstacles) {
+        if (Math.abs(obstacle.x - x) < minDistance) {
+          return false
+        }
+      }
+      // Check all existing gaps
+      for (let gap of gaps) {
+        if (Math.abs(gap.x - x) < minDistance) {
+          return false
+        }
+      }
+      return true
+    }
+    
+    // Spawn obstacle (more varied timing)
     function spawnObstacle() {
-      const height = 32 + Math.floor(Math.random() * 3) * 16
+      const minDistance = 280 // Minimum distance between different obstacle types
+      
+      // Check if area is clear
+      if (!isAreaClear(canvas.width, minDistance)) {
+        return false // Don't spawn, too close to another obstacle
+      }
+      
+      const height = 32 + Math.floor(Math.random() * 4) * 16
       obstacles.push({
         x: canvas.width,
         y: groundY - height,
@@ -234,6 +594,63 @@ function JumpAndRunGame() {
         height: height,
         speed: 4
       })
+      lastObstacleX = canvas.width
+      
+      // Sometimes spawn another obstacle close behind (15% chance, reduced for fairness)
+      if (Math.random() < 0.15) {
+        setTimeout(() => {
+          const height2 = 32 + Math.floor(Math.random() * 3) * 16
+          obstacles.push({
+            x: canvas.width + 150,
+            y: groundY - height2,
+            width: 32,
+            height: height2,
+            speed: 4
+          })
+        }, 350)
+      }
+      
+      return true
+    }
+    
+    // Spawn gap/hole
+    function spawnGap() {
+      const minDistance = 280 // Minimum distance between different obstacle types
+      
+      // Check if area is clear
+      if (!isAreaClear(canvas.width, minDistance)) {
+        return false // Don't spawn, too close to another obstacle
+      }
+      
+      const width = 70 + Math.random() * 20 // Smaller, more jumpable gaps
+      gaps.push({
+        x: canvas.width,
+        width: width,
+        speed: 4
+      })
+      lastGapX = canvas.width
+      
+      return true
+    }
+    
+    // Spawn diamond
+    function spawnDiamond() {
+      // Check if area is relatively clear (smaller distance requirement for diamonds)
+      if (!isAreaClear(canvas.width, 150)) {
+        return false // Don't spawn if too crowded
+      }
+      
+      const height = groundY - 100 - Math.random() * 100
+      diamonds.push({
+        x: canvas.width,
+        y: height,
+        width: 24,
+        height: 24,
+        speed: 4,
+        collected: false
+      })
+      
+      return true
     }
     
     // Spawn cloud
@@ -243,6 +660,22 @@ function JumpAndRunGame() {
         y: 40 + Math.random() * 80,
         speed: 0.5 + Math.random() * 0.5
       })
+    }
+    
+    // Create confetti
+    function createConfetti() {
+      const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500']
+      for (let i = 0; i < 150; i++) {
+        confetti.push({
+          x: canvas.width / 2,
+          y: canvas.height / 3,
+          vx: (Math.random() - 0.5) * 10,
+          vy: (Math.random() - 0.5) * 10 - 5,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * Math.PI * 2,
+          rotationSpeed: (Math.random() - 0.5) * 0.2
+        })
+      }
     }
     
     // Check collision
@@ -255,9 +688,15 @@ function JumpAndRunGame() {
     
     // Jump function
     function jump() {
-      if (!player.jumping && !gameOver) {
+      if (!player.jumping && !gameOver && !gameWon && !isPaused) {
         player.velocityY = player.jumpPower
         player.jumping = true
+        
+        // Play jump sound
+        if (jumpSoundRef.current) {
+          jumpSoundRef.current.currentTime = 0
+          jumpSoundRef.current.play().catch(e => console.log('Jump sound error:', e))
+        }
       }
     }
     
@@ -265,16 +704,36 @@ function JumpAndRunGame() {
     function handleKeyPress(e) {
       if (e.code === 'Space') {
         e.preventDefault()
-        if (gameOver) {
+        if (gameOver || showingCoordinates) {
           // Restart game
           setGameOver(false)
           setScore(0)
           obstacles.length = 0
+          gaps.length = 0
+          diamonds.length = 0
+          confetti.length = 0
           clouds.length = 0
           gameScore = 0
-          player.y = 280
+          gameWon = false
+          showingCoordinates = false
+          confettiTimer = 0
+          lastObstacleX = -500
+          lastGapX = -500
+          obstacleTimer = 0
+          gapTimer = 0
+          diamondTimer = 0
+          player.y = 330
           player.velocityY = 0
           player.jumping = false
+          dog.y = 360
+          dog.velocityY = 0
+          dog.jumping = false
+          
+          // Restart soundtrack
+          if (soundtrackRef.current && !isMusicMuted) {
+            soundtrackRef.current.currentTime = 0
+            soundtrackRef.current.play().catch(e => console.log('Soundtrack error:', e))
+          }
         } else {
           jump()
         }
@@ -283,32 +742,74 @@ function JumpAndRunGame() {
     
     window.addEventListener('keydown', handleKeyPress)
     
+    // Draw stars for night sky
+    function drawStars(score) {
+      if (score < 750) return
+      
+      const starProgress = Math.min((score - 750) / 250, 1)
+      const numStars = Math.floor(starProgress * 80)
+      
+      // Seed-based random stars so they stay in same place
+      ctx.fillStyle = '#ffffff'
+      for (let i = 0; i < numStars; i++) {
+        const x = (i * 1234.5 % canvas.width)
+        const y = (i * 789.3 % (groundY - 50))
+        const size = (i % 3) === 0 ? 2 : 1
+        ctx.fillRect(x, y, size, size)
+        
+        // Twinkling effect
+        if ((frameCount + i * 10) % 60 < 30) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
+          ctx.fillRect(x, y, size, size)
+          ctx.fillStyle = '#ffffff'
+        }
+      }
+    }
+    
     // Game loop
     function gameLoop() {
-      frameCount++
-      
-      // Draw sky
-      ctx.fillStyle = colors.sky
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-      
-      // Update and draw clouds
-      cloudTimer++
-      if (cloudTimer > 150) {
-        spawnCloud()
-        cloudTimer = 0
+      // Skip updates if paused, but still draw
+      if (!isPaused) {
+        frameCount++
       }
       
-      for (let i = clouds.length - 1; i >= 0; i--) {
-        const cloud = clouds[i]
-        cloud.x -= cloud.speed
-        drawCloud(cloud.x, cloud.y)
+      // Get dynamic sky colors based on score
+      const skyColors = getSkyColors(gameScore)
+      
+      // Draw dynamic sky with gradient
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
+      gradient.addColorStop(0, skyColors.skyTop)
+      gradient.addColorStop(0.5, skyColors.skyMiddle)
+      gradient.addColorStop(1, skyColors.skyBottom)
+      ctx.fillStyle = gradient
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      
+      // Draw stars if night time (score >= 750)
+      drawStars(gameScore)
+      
+      // Update and draw clouds
+      if (!isPaused) {
+        cloudTimer++
+        if (cloudTimer > 150) {
+          spawnCloud()
+          cloudTimer = 0
+        }
         
-        if (cloud.x < -60) {
-          clouds.splice(i, 1)
+        for (let i = clouds.length - 1; i >= 0; i--) {
+          const cloud = clouds[i]
+          cloud.x -= cloud.speed
+          if (cloud.x < -60) {
+            clouds.splice(i, 1)
+          }
         }
       }
       
-      if (!gameOver) {
+      // Always draw clouds with dynamic color
+      for (let i = 0; i < clouds.length; i++) {
+        drawCloud(clouds[i].x, clouds[i].y, skyColors.cloud)
+      }
+      
+      if (!gameOver && !gameWon && !isPaused) {
         // Update player physics
         player.velocityY += player.gravity
         player.y += player.velocityY
@@ -320,11 +821,60 @@ function JumpAndRunGame() {
           player.jumping = false
         }
         
-        // Spawn obstacles
+        // Update dog physics - follow player
+        dog.x = player.x + dog.offsetX
+        
+        // Dog jumps when player jumps
+        if (player.jumping && !dog.jumping && player.velocityY < 0) {
+          dog.velocityY = player.jumpPower
+          dog.jumping = true
+        }
+        
+        dog.velocityY += player.gravity
+        dog.y += dog.velocityY
+        
+        // Dog ground collision
+        if (dog.y + dog.height >= groundY) {
+          dog.y = groundY - dog.height
+          dog.velocityY = 0
+          dog.jumping = false
+        }
+        
+        // Spawn obstacles (more varied timing)
         obstacleTimer++
-        if (obstacleTimer > 120) {
-          spawnObstacle()
-          obstacleTimer = 0
+        const obstacleSpawnInterval = 90 + Math.random() * 60
+        if (obstacleTimer > obstacleSpawnInterval) {
+          const spawned = spawnObstacle()
+          if (spawned !== false) {
+            obstacleTimer = 0
+          } else {
+            // If spawn was blocked, wait a bit and try again
+            obstacleTimer = obstacleSpawnInterval - 30
+          }
+        }
+        
+        // Spawn gaps occasionally (less frequent now)
+        gapTimer++
+        if (gapTimer > 500) {
+          const spawned = spawnGap()
+          if (spawned !== false) {
+            gapTimer = Math.random() * 150 // Random offset
+          } else {
+            // If spawn was blocked, wait a bit and try again
+            gapTimer = 450
+          }
+        }
+        
+        // Spawn diamonds regularly
+        diamondTimer++
+        if (diamondTimer > 100) {
+          const spawned = spawnDiamond()
+          if (spawned !== false) {
+            diamondTimer = 0
+          } else {
+            // If spawn was blocked, try again soon
+            diamondTimer = 80
+          }
         }
         
         // Update and draw obstacles
@@ -338,6 +888,15 @@ function JumpAndRunGame() {
           // Check collision
           if (checkCollision(player, obstacle)) {
             setGameOver(true)
+            // Play game over sound
+            if (gameOverSoundRef.current) {
+              gameOverSoundRef.current.currentTime = 0
+              gameOverSoundRef.current.play().catch(e => console.log('Game over sound error:', e))
+            }
+            // Stop soundtrack
+            if (soundtrackRef.current) {
+              soundtrackRef.current.pause()
+            }
           }
           
           // Remove off-screen obstacles and increase score
@@ -348,10 +907,135 @@ function JumpAndRunGame() {
           }
         }
         
+        // Update lastObstacleX to the rightmost obstacle on screen
+        if (obstacles.length > 0) {
+          lastObstacleX = Math.max(...obstacles.map(o => o.x))
+        } else {
+          lastObstacleX = -500
+        }
+        
+        // Update gaps (just move them, don't draw yet)
+        for (let i = gaps.length - 1; i >= 0; i--) {
+          const gap = gaps[i]
+          gap.x -= gap.speed
+          
+          // Check if PLAYER (not dog) falls into gap (very lenient hitbox)
+          const playerCenterX = player.x + player.width / 2
+          const playerOnGround = player.y + player.height >= groundY - 2
+          
+          // Only game over if the CENTER of PLAYER is WELL inside the gap AND touching ground
+          // Dog can fall in, doesn't matter!
+          if (playerOnGround && playerCenterX > gap.x + 20 && playerCenterX < gap.x + gap.width - 20) {
+            setGameOver(true)
+            // Play game over sound
+            if (gameOverSoundRef.current) {
+              gameOverSoundRef.current.currentTime = 0
+              gameOverSoundRef.current.play().catch(e => console.log('Game over sound error:', e))
+            }
+            // Stop soundtrack
+            if (soundtrackRef.current) {
+              soundtrackRef.current.pause()
+            }
+          }
+          
+          // Remove off-screen gaps
+          if (gap.x + gap.width < 0) {
+            gaps.splice(i, 1)
+            gameScore += 5
+            setScore(gameScore)
+          }
+        }
+        
+        // Update lastGapX to the rightmost gap on screen
+        if (gaps.length > 0) {
+          lastGapX = Math.max(...gaps.map(g => g.x))
+        } else {
+          lastGapX = -500
+        }
+        
+        // Update and draw diamonds
+        for (let i = diamonds.length - 1; i >= 0; i--) {
+          const diamond = diamonds[i]
+          diamond.x -= diamond.speed
+          
+          // Draw diamond
+          drawDiamond(diamond.x, diamond.y, frameCount)
+          
+          // Check collection
+          if (!diamond.collected && 
+              player.x < diamond.x + diamond.width &&
+              player.x + player.width > diamond.x &&
+              player.y < diamond.y + diamond.height &&
+              player.y + player.height > diamond.y) {
+            diamond.collected = true
+            gameScore += 20
+            setScore(gameScore)
+            diamonds.splice(i, 1)
+            
+            // Play coin sound
+            if (coinSoundRef.current) {
+              coinSoundRef.current.currentTime = 0
+              coinSoundRef.current.play().catch(e => console.log('Coin sound error:', e))
+            }
+            continue
+          }
+          
+          // Remove off-screen diamonds
+          if (diamond.x + diamond.width < 0) {
+            diamonds.splice(i, 1)
+          }
+        }
+        
+        // Check win condition
+        if (gameScore >= 1000 && !gameWon) {
+          gameWon = true
+          createConfetti()
+        }
+      }
+      
+      // Continue moving obstacles even when won (until coordinates show)
+      if (gameWon && !showingCoordinates && !isPaused) {
+        // Keep obstacles moving
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+          const obstacle = obstacles[i]
+          obstacle.x -= obstacle.speed
+          drawBrick(obstacle.x, obstacle.y, obstacle.width, obstacle.height)
+          if (obstacle.x + obstacle.width < 0) {
+            obstacles.splice(i, 1)
+          }
+        }
+        
+        // Keep gaps moving (don't draw yet)
+        for (let i = gaps.length - 1; i >= 0; i--) {
+          const gap = gaps[i]
+          gap.x -= gap.speed
+          if (gap.x + gap.width < 0) {
+            gaps.splice(i, 1)
+          }
+        }
+        
+        // Keep diamonds moving
+        for (let i = diamonds.length - 1; i >= 0; i--) {
+          const diamond = diamonds[i]
+          diamond.x -= diamond.speed
+          drawDiamond(diamond.x, diamond.y, frameCount)
+          if (diamond.x + diamond.width < 0) {
+            diamonds.splice(i, 1)
+          }
+        }
+      }
+      
+      if (!gameOver && !showingCoordinates) {
+        // Draw dog first (behind player)
+        const dogBob = dog.jumping ? 0 : Math.sin(frameCount * 0.3) * 1.5
+        drawDog(dog.x, dog.y + dogBob, dog.jumping, frameCount)
+        
         // Draw player with running bob effect
         const runBob = player.jumping ? 0 : Math.sin(frameCount * 0.3) * 2
         drawGirl(player.x, player.y + runBob, player.jumping, frameCount)
-      } else {
+      } else if (!showingCoordinates) {
+        // Draw dog even when game over
+        drawDog(dog.x, dog.y, false, 0)
         // Draw player even when game over
         drawGirl(player.x, player.y, false, 0)
       }
@@ -366,6 +1050,41 @@ function JumpAndRunGame() {
         ctx.fillRect(i, groundY, 16, 4)
       }
       
+      // Draw gaps/holes AFTER ground (so they're visible)
+      for (let i = 0; i < gaps.length; i++) {
+        drawGap(gaps[i].x, gaps[i].width)
+      }
+      
+      // Update and draw confetti
+      if (gameWon && !isPaused) {
+        confettiTimer++
+        
+        for (let i = confetti.length - 1; i >= 0; i--) {
+          const particle = confetti[i]
+          particle.x += particle.vx
+          particle.y += particle.vy
+          particle.vy += 0.3 // Gravity
+          particle.rotation += particle.rotationSpeed
+          
+          drawConfetti(particle)
+          
+          // Remove particles that fell off screen
+          if (particle.y > canvas.height) {
+            confetti.splice(i, 1)
+          }
+        }
+        
+        // After confetti (3 seconds), show coordinates
+        if (confettiTimer > 180) {
+          showingCoordinates = true
+        }
+      } else if (gameWon && isPaused) {
+        // Still draw confetti when paused, just don't update
+        for (let i = 0; i < confetti.length; i++) {
+          drawConfetti(confetti[i])
+        }
+      }
+      
       // Draw score
       ctx.fillStyle = '#ffffff'
       ctx.strokeStyle = '#000000'
@@ -374,7 +1093,59 @@ function JumpAndRunGame() {
       ctx.strokeText(`SCORE: ${gameScore}`, 10, 30)
       ctx.fillText(`SCORE: ${gameScore}`, 10, 30)
       
-      if (gameOver) {
+      if (showingCoordinates) {
+        // Win screen with coordinates
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.85)'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        
+        ctx.fillStyle = '#ffffff'
+        ctx.strokeStyle = '#000000'
+        ctx.lineWidth = 4
+        
+        // Congratulations text
+        ctx.font = 'bold 36px monospace'
+        const winText = 'GEWONNEN!'
+        const winWidth = ctx.measureText(winText).width
+        ctx.strokeText(winText, canvas.width / 2 - winWidth / 2, canvas.height / 2 - 80)
+        ctx.fillText(winText, canvas.width / 2 - winWidth / 2, canvas.height / 2 - 80)
+        
+        // Coordinates (bold and centered)
+        ctx.font = 'bold 28px monospace'
+        const coords = '49.853666531564116, 8.64915914604958'
+        const coordsWidth = ctx.measureText(coords).width
+        ctx.strokeText(coords, canvas.width / 2 - coordsWidth / 2, canvas.height / 2)
+        ctx.fillText(coords, canvas.width / 2 - coordsWidth / 2, canvas.height / 2)
+        
+        // Date text
+        ctx.font = 'bold 22px monospace'
+        const dateText = 'Datum: _ _._ _._ _'
+        const dateWidth = ctx.measureText(dateText).width
+        ctx.strokeText(dateText, canvas.width / 2 - dateWidth / 2, canvas.height / 2 + 50)
+        ctx.fillText(dateText, canvas.width / 2 - dateWidth / 2, canvas.height / 2 + 50)
+        
+        // Message
+        ctx.font = 'bold 16px monospace'
+        const msg1 = 'Hier wird es weitergehen.'
+        const msg2 = 'Und um zu verstehen wann, musst du'
+        const msg3 = 'an den Anfang zurückkehren.'
+        const msg1Width = ctx.measureText(msg1).width
+        const msg2Width = ctx.measureText(msg2).width
+        const msg3Width = ctx.measureText(msg3).width
+        ctx.strokeText(msg1, canvas.width / 2 - msg1Width / 2, canvas.height / 2 + 100)
+        ctx.fillText(msg1, canvas.width / 2 - msg1Width / 2, canvas.height / 2 + 100)
+        ctx.strokeText(msg2, canvas.width / 2 - msg2Width / 2, canvas.height / 2 + 125)
+        ctx.fillText(msg2, canvas.width / 2 - msg2Width / 2, canvas.height / 2 + 125)
+        ctx.strokeText(msg3, canvas.width / 2 - msg3Width / 2, canvas.height / 2 + 150)
+        ctx.fillText(msg3, canvas.width / 2 - msg3Width / 2, canvas.height / 2 + 150)
+        
+        // Restart hint
+        ctx.font = 'bold 14px monospace'
+        const restartText = 'LEERTASTE ZUM NEUSTART'
+        const restartWidth = ctx.measureText(restartText).width
+        ctx.strokeText(restartText, canvas.width / 2 - restartWidth / 2, canvas.height / 2 + 190)
+        ctx.fillText(restartText, canvas.width / 2 - restartWidth / 2, canvas.height / 2 + 190)
+        
+      } else if (gameOver) {
         // Game over screen with retro style
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'
         ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -395,6 +1166,27 @@ function JumpAndRunGame() {
         ctx.fillText(restartText, canvas.width / 2 - restartWidth / 2, canvas.height / 2 + 50)
       }
       
+      // Draw pause overlay
+      if (isPaused && !gameOver && !showingCoordinates) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        
+        ctx.fillStyle = '#ffffff'
+        ctx.strokeStyle = '#000000'
+        ctx.lineWidth = 4
+        ctx.font = 'bold 56px monospace'
+        const pauseText = 'PAUSE'
+        const pauseWidth = ctx.measureText(pauseText).width
+        ctx.strokeText(pauseText, canvas.width / 2 - pauseWidth / 2, canvas.height / 2 - 20)
+        ctx.fillText(pauseText, canvas.width / 2 - pauseWidth / 2, canvas.height / 2 - 20)
+        
+        ctx.font = 'bold 24px monospace'
+        const resumeText = 'Klicke auf ▶️ zum Weiterspielen'
+        const resumeWidth = ctx.measureText(resumeText).width
+        ctx.strokeText(resumeText, canvas.width / 2 - resumeWidth / 2, canvas.height / 2 + 40)
+        ctx.fillText(resumeText, canvas.width / 2 - resumeWidth / 2, canvas.height / 2 + 40)
+      }
+      
       animationId = requestAnimationFrame(gameLoop)
     }
     
@@ -408,26 +1200,84 @@ function JumpAndRunGame() {
     }
   }, [gameStarted, gameOver])
   
+  // Initialize audio on start
+  useEffect(() => {
+    if (gameStarted && !isPaused && !gameOver) {
+      // Set volumes
+      if (jumpSoundRef.current) jumpSoundRef.current.volume = 0.3
+      if (coinSoundRef.current) coinSoundRef.current.volume = 0.5
+      if (gameOverSoundRef.current) gameOverSoundRef.current.volume = 0.6
+      if (soundtrackRef.current) soundtrackRef.current.volume = 0.4
+      
+      // Play soundtrack
+      if (soundtrackRef.current && !isMusicMuted) {
+        soundtrackRef.current.loop = true
+        soundtrackRef.current.play().catch(e => console.log('Soundtrack error:', e))
+      }
+    }
+  }, [gameStarted])
+  
+  // Handle soundtrack mute/unmute
+  useEffect(() => {
+    if (soundtrackRef.current) {
+      if (isMusicMuted || isPaused || gameOver) {
+        soundtrackRef.current.pause()
+      } else if (gameStarted && !gameOver) {
+        soundtrackRef.current.play().catch(e => console.log('Soundtrack error:', e))
+      }
+    }
+  }, [isMusicMuted, isPaused, gameOver, gameStarted])
+  
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ background: '#5c94fc' }}>
+      {/* Hidden audio elements */}
+      <audio ref={soundtrackRef} src="/soundtrack.mp3" />
+      <audio ref={jumpSoundRef} src="/jump.mp3" />
+      <audio ref={gameOverSoundRef} src="/game_over.mp3" />
+      <audio ref={coinSoundRef} src="/coin.mp3" />
+      
       {!gameStarted ? (
-        <div className="flex flex-col items-center gap-8">
-          <h1 className="text-6xl font-mono font-bold" style={{ 
+        <div className="flex flex-col items-center gap-6 max-w-3xl">
+          <h1 className="text-5xl font-mono font-bold text-center" style={{ 
             color: '#ffffff',
             textShadow: '4px 4px 0px #000000, 8px 8px 0px rgba(0,0,0,0.3)',
-            letterSpacing: '0.1em'
+            letterSpacing: '0.05em',
+            lineHeight: '1.3'
           }}>
-            JUMP & RUN
+            AURELIA & AMY<br/>
+            <span style={{ fontSize: '0.7em' }}>JUMPING & RUNNING</span>
           </h1>
-          <div className="text-2xl font-mono font-bold text-white" style={{
-            textShadow: '2px 2px 0px #000000'
-          }}>
-            🌟 Springe über die Hindernisse! 🌟
+          
+          <div className="bg-black bg-opacity-70 p-6 rounded-lg border-4 border-white max-w-2xl">
+            <div className="text-xl font-mono font-bold text-white mb-4" style={{
+              textShadow: '2px 2px 0px #000000',
+              textAlign: 'center'
+            }}>
+              🎯 SPIELANLEITUNG 🎯
+            </div>
+            <div className="text-base font-mono text-white space-y-3" style={{
+              textShadow: '1px 1px 0px #000000',
+              lineHeight: '1.6'
+            }}>
+              <p>
+                <span className="font-bold text-yellow-300">🏆 Ziel:</span> Erreiche 1.000 Punkte, um das Spiel zu gewinnen!
+              </p>
+              <p>
+                <span className="font-bold text-green-300">💎 Punkte sammeln:</span> Springe über Hürden und sammle Diamanten.
+              </p>
+              <p>
+                <span className="font-bold text-blue-300">🦸‍♀️ Aurelia (Du):</span> Berührst du eine Hürde = Game Over!
+              </p>
+              <p>
+                <span className="font-bold text-pink-300">🐕 Amy (Hund):</span> Sie darf Hürden berühren - kein Problem!
+              </p>
+            </div>
           </div>
-          <p className="text-xl font-mono text-white" style={{
+          
+          <p className="text-xl font-mono font-bold text-white" style={{
             textShadow: '2px 2px 0px #000000'
           }}>
-            Drücke LEERTASTE zum Springen
+            ⬆️ Drücke LEERTASTE zum Springen
           </p>
           <button
             onClick={() => setGameStarted(true)}
@@ -453,18 +1303,55 @@ function JumpAndRunGame() {
         </div>
       ) : (
         <div className="flex flex-col items-center gap-6">
-          <canvas
-            ref={canvasRef}
-            width={800}
-            height={400}
-            className="rounded-lg"
-            style={{ 
-              maxWidth: '100%', 
-              height: 'auto',
-              border: '8px solid #8b5524',
-              boxShadow: '0 8px 16px rgba(0,0,0,0.5)'
-            }}
-          />
+          <div className="relative">
+            {/* Control Buttons - Top Right */}
+            <div className="absolute top-2 right-2 flex gap-2 z-10">
+              {/* Mute/Unmute Button */}
+              <button
+                onClick={() => setIsMusicMuted(!isMusicMuted)}
+                className="w-12 h-12 rounded-lg font-bold transition-all duration-200 transform hover:scale-110"
+                style={{
+                  background: isMusicMuted ? '#ff0000' : '#00a800',
+                  color: '#ffffff',
+                  border: '3px solid #000000',
+                  boxShadow: '0 4px 0 #000000',
+                  fontSize: '20px'
+                }}
+                title={isMusicMuted ? 'Musik einschalten' : 'Musik ausschalten'}
+              >
+                {isMusicMuted ? '🔇' : '🔊'}
+              </button>
+              
+              {/* Pause Button */}
+              <button
+                onClick={() => setIsPaused(!isPaused)}
+                className="w-12 h-12 rounded-lg font-bold transition-all duration-200 transform hover:scale-110"
+                style={{
+                  background: '#ffcc00',
+                  color: '#000000',
+                  border: '3px solid #000000',
+                  boxShadow: '0 4px 0 #000000',
+                  fontSize: '20px'
+                }}
+                title={isPaused ? 'Weiterspielen' : 'Pause'}
+              >
+                {isPaused ? '▶️' : '⏸️'}
+              </button>
+            </div>
+            
+            <canvas
+              ref={canvasRef}
+              width={1000}
+              height={500}
+              className="rounded-lg"
+              style={{ 
+                maxWidth: '100%', 
+                height: 'auto',
+                border: '8px solid #8b5524',
+                boxShadow: '0 8px 16px rgba(0,0,0,0.5)'
+              }}
+            />
+          </div>
           <div className="text-2xl font-mono font-bold px-6 py-3 rounded-lg" style={{
             background: '#000000',
             color: '#ffffff',
