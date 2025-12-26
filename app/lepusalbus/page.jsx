@@ -1512,11 +1512,11 @@ function EncryptedWord({ word, isPunctuation = false }) {
 }
 
 export default function LepusAlbusPage() {
-  const [inputs, setInputs] = useState(['', '', '', '', ''])
+  const [inputs, setInputs] = useState(['', '', '', '', '', ''])
   const [showSuccess, setShowSuccess] = useState(false)
   const [isShaking, setIsShaking] = useState(false)
   
-  const CORRECT_ANSWER = ['+', '!', '&', '+', ':)']
+  const CORRECT_ANSWER = ['+', '#', '!', '&', '+', ':)']
   
   const text = `Gratuliere! Den ersten Teil hast du schon mal geschafft. Jetzt hast du ein Gefühl für das Spiel. Wenn ich dir eins mitgeben kann für alle Rätsel, die noch kommen werden, dann das: Der Weg ist das Ziel.`
 
@@ -1543,7 +1543,7 @@ export default function LepusAlbusPage() {
 
   const handleInputChange = (index, value) => {
     // Für das letzte Feld erlauben wir bis zu 2 Zeichen, für die anderen nur 1
-    const maxLength = index === 4 ? 2 : 1
+    const maxLength = index === 5 ? 2 : 1
     const filteredValue = value.slice(0, maxLength)
     
     const newInputs = [...inputs]
@@ -1551,12 +1551,17 @@ export default function LepusAlbusPage() {
     setInputs(newInputs)
 
     // Automatisch zum nächsten Feld springen, wenn ein Zeichen eingegeben wurde (außer beim letzten Feld)
-    if (filteredValue && index < 4) {
+    if (filteredValue && index < 5) {
       const nextInput = document.getElementById(`input-${index + 1}`)
       if (nextInput) {
         nextInput.focus()
       }
     }
+  }
+  
+  // Prüfe ob ein einzelnes Feld korrekt ist
+  const isFieldCorrect = (index) => {
+    return inputs[index] && inputs[index] === CORRECT_ANSWER[index]
   }
 
   const handleKeyDown = (index, e) => {
@@ -1618,7 +1623,7 @@ export default function LepusAlbusPage() {
           })}
         </div>
         
-        {/* 5 Input-Felder (das letzte ist doppelt so breit) */}
+        {/* 6 Input-Felder (das letzte ist doppelt so breit) */}
         <div className="flex gap-3 justify-center items-center flex-wrap">
           {inputs.map((value, index) => (
             <input
@@ -1628,12 +1633,14 @@ export default function LepusAlbusPage() {
               value={value}
               onChange={(e) => handleInputChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
-              maxLength={index === 4 ? 2 : 1}
+              maxLength={index === 5 ? 2 : 1}
               className={`${
-                index === 4 ? 'w-24 sm:w-28' : 'w-12 sm:w-14'
+                index === 5 ? 'w-24 sm:w-28' : 'w-12 sm:w-14'
               } h-12 sm:h-14 text-center text-white bg-transparent border-2 rounded-md focus:outline-none focus:ring-2 focus:ring-opacity-50 text-xl sm:text-2xl font-mono transition-all duration-200 ${
                 isShaking 
                   ? 'border-red-500 animate-shake' 
+                  : isFieldCorrect(index)
+                  ? 'border-green-500 bg-green-500 bg-opacity-20 focus:border-green-500 focus:ring-green-500'
                   : 'border-white focus:border-white focus:ring-white'
               }`}
               style={{
