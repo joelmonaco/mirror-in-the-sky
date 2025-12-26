@@ -41,12 +41,23 @@ function JumpAndRunGame() {
   const [gameStarted, setGameStarted] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [isMusicMuted, setIsMusicMuted] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   
   // Audio refs
   const soundtrackRef = useRef(null)
   const jumpSoundRef = useRef(null)
   const gameOverSoundRef = useRef(null)
   const coinSoundRef = useRef(null)
+  
+  // Detect mobile/tablet on mount
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
   
   useEffect(() => {
     if (!gameStarted) return
@@ -56,10 +67,13 @@ function JumpAndRunGame() {
     
     const ctx = canvas.getContext('2d')
     
+    // Ground level (dynamic based on canvas height)
+    const groundY = canvas.height - 50
+    
     // Game variables
     const player = {
       x: 120,
-      y: 330,
+      y: groundY - 120,
       width: 48,
       height: 72,
       velocityY: 0,
@@ -70,7 +84,7 @@ function JumpAndRunGame() {
     
     const dog = {
       x: 50,
-      y: 360,
+      y: groundY - 90,
       width: 32,
       height: 24,
       velocityY: 0,
@@ -95,9 +109,6 @@ function JumpAndRunGame() {
     let confettiTimer = 0
     let lastObstacleX = -500 // Track last obstacle position
     let lastGapX = -500 // Track last gap position
-    
-    // Ground level
-    const groundY = 450
     
     // Get sky colors based on score
     function getSkyColors(score) {
@@ -640,7 +651,10 @@ function JumpAndRunGame() {
         return false // Don't spawn if too crowded
       }
       
-      const height = groundY - 100 - Math.random() * 100
+      // Spawn diamonds between 100-300 pixels above ground, proportional to screen size
+      const minHeight = Math.min(100, canvas.height * 0.2)
+      const maxHeight = Math.min(300, canvas.height * 0.5)
+      const height = groundY - minHeight - Math.random() * (maxHeight - minHeight)
       diamonds.push({
         x: canvas.width,
         y: height,
@@ -655,9 +669,11 @@ function JumpAndRunGame() {
     
     // Spawn cloud
     function spawnCloud() {
+      const cloudMinY = canvas.height * 0.08 // 8% from top
+      const cloudMaxY = canvas.height * 0.25 // 25% from top
       clouds.push({
         x: canvas.width,
-        y: 40 + Math.random() * 80,
+        y: cloudMinY + Math.random() * (cloudMaxY - cloudMinY),
         speed: 0.5 + Math.random() * 0.5
       })
     }
@@ -722,10 +738,10 @@ function JumpAndRunGame() {
           obstacleTimer = 0
           gapTimer = 0
           diamondTimer = 0
-          player.y = 330
+          player.y = groundY - 120
           player.velocityY = 0
           player.jumping = false
-          dog.y = 360
+          dog.y = groundY - 90
           dog.velocityY = 0
           dog.jumping = false
           
@@ -1308,8 +1324,8 @@ function JumpAndRunGame() {
             
             <canvas
               ref={canvasRef}
-              width={1000}
-              height={500}
+              width={isMobile ? 600 : 1000}
+              height={isMobile ? 900 : 500}
               className="rounded-lg"
               style={{ 
                 maxWidth: '100%', 
