@@ -33,6 +33,452 @@ function generateEncrypted(word) {
   return encrypted.join('')
 }
 
+// Jump & Run Game Komponente
+function JumpAndRunGame() {
+  const canvasRef = useRef(null)
+  const [score, setScore] = useState(0)
+  const [gameOver, setGameOver] = useState(false)
+  const [gameStarted, setGameStarted] = useState(false)
+  
+  useEffect(() => {
+    if (!gameStarted) return
+    
+    const canvas = canvasRef.current
+    if (!canvas) return
+    
+    const ctx = canvas.getContext('2d')
+    
+    // Game variables
+    const player = {
+      x: 80,
+      y: 280,
+      width: 32,
+      height: 48,
+      velocityY: 0,
+      jumping: false,
+      gravity: 0.8,
+      jumpPower: -15
+    }
+    
+    const obstacles = []
+    const clouds = []
+    let obstacleTimer = 0
+    let cloudTimer = 0
+    let gameScore = 0
+    let animationId
+    let frameCount = 0
+    
+    // Ground level
+    const groundY = 350
+    
+    // Nintendo Color Palette
+    const colors = {
+      sky: '#5c94fc',
+      ground: '#8b5524',
+      grass: '#00a800',
+      brick: '#e39d3e',
+      cloud: '#ffffff',
+      skin: '#ffcca1',
+      hair: '#ffd700',
+      dress: '#ff69b4',
+      shoes: '#8b4513'
+    }
+    
+    // Draw pixel girl character with animations
+    function drawGirl(x, y, isJumping, frame) {
+      const pixelSize = 4
+      
+      // Add rotation when jumping (like Mario)
+      if (isJumping) {
+        ctx.save()
+        ctx.translate(x + 16, y + 24)
+        ctx.rotate(Math.PI / 12) // Slight forward rotation
+        ctx.translate(-(x + 16), -(y + 24))
+      }
+      
+      if (isJumping) {
+        // Jumping pose - arms up, legs together
+        // Hair (blonde)
+        ctx.fillStyle = colors.hair
+        ctx.fillRect(x + pixelSize * 2, y, pixelSize * 4, pixelSize)
+        ctx.fillRect(x + pixelSize, y + pixelSize, pixelSize * 6, pixelSize * 2)
+        ctx.fillRect(x, y + pixelSize * 3, pixelSize * 8, pixelSize)
+        
+        // Face (skin)
+        ctx.fillStyle = colors.skin
+        ctx.fillRect(x + pixelSize * 2, y + pixelSize * 3, pixelSize * 4, pixelSize * 3)
+        
+        // Eyes (excited)
+        ctx.fillStyle = '#000000'
+        ctx.fillRect(x + pixelSize * 2, y + pixelSize * 4, pixelSize, pixelSize)
+        ctx.fillRect(x + pixelSize * 5, y + pixelSize * 4, pixelSize, pixelSize)
+        
+        // Open mouth (excited)
+        ctx.fillRect(x + pixelSize * 3, y + pixelSize * 5, pixelSize * 2, pixelSize)
+        
+        // Dress/Body
+        ctx.fillStyle = colors.dress
+        ctx.fillRect(x + pixelSize, y + pixelSize * 6, pixelSize * 6, pixelSize * 4)
+        
+        // Arms UP (jumping pose)
+        ctx.fillStyle = colors.skin
+        ctx.fillRect(x, y + pixelSize * 5, pixelSize, pixelSize * 2)
+        ctx.fillRect(x + pixelSize * 7, y + pixelSize * 5, pixelSize, pixelSize * 2)
+        
+        // Legs together (jumping)
+        ctx.fillStyle = colors.skin
+        ctx.fillRect(x + pixelSize * 3, y + pixelSize * 10, pixelSize * 2, pixelSize * 2)
+        
+        // Shoes together
+        ctx.fillStyle = colors.shoes
+        ctx.fillRect(x + pixelSize * 2, y + pixelSize * 11, pixelSize * 4, pixelSize)
+        
+      } else {
+        // Running animation - alternating legs
+        const runFrame = Math.floor(frame / 8) % 2
+        
+        // Hair (blonde)
+        ctx.fillStyle = colors.hair
+        ctx.fillRect(x + pixelSize * 2, y, pixelSize * 4, pixelSize)
+        ctx.fillRect(x + pixelSize, y + pixelSize, pixelSize * 6, pixelSize * 2)
+        ctx.fillRect(x, y + pixelSize * 3, pixelSize * 8, pixelSize)
+        
+        // Face (skin)
+        ctx.fillStyle = colors.skin
+        ctx.fillRect(x + pixelSize * 2, y + pixelSize * 3, pixelSize * 4, pixelSize * 3)
+        
+        // Eyes
+        ctx.fillStyle = '#000000'
+        ctx.fillRect(x + pixelSize * 2, y + pixelSize * 4, pixelSize, pixelSize)
+        ctx.fillRect(x + pixelSize * 5, y + pixelSize * 4, pixelSize, pixelSize)
+        
+        // Smile
+        ctx.fillRect(x + pixelSize * 3, y + pixelSize * 5, pixelSize * 2, pixelSize)
+        
+        // Dress/Body
+        ctx.fillStyle = colors.dress
+        ctx.fillRect(x + pixelSize, y + pixelSize * 6, pixelSize * 6, pixelSize * 4)
+        
+        // Arms swing while running
+        ctx.fillStyle = colors.skin
+        if (runFrame === 0) {
+          // Frame 1: Left arm forward, right arm back
+          ctx.fillRect(x, y + pixelSize * 7, pixelSize, pixelSize * 2)
+          ctx.fillRect(x + pixelSize * 7, y + pixelSize * 8, pixelSize, pixelSize * 2)
+        } else {
+          // Frame 2: Right arm forward, left arm back
+          ctx.fillRect(x, y + pixelSize * 8, pixelSize, pixelSize * 2)
+          ctx.fillRect(x + pixelSize * 7, y + pixelSize * 7, pixelSize, pixelSize * 2)
+        }
+        
+        // Legs - alternating running animation
+        ctx.fillStyle = colors.skin
+        if (runFrame === 0) {
+          // Frame 1: Left leg forward, right leg back
+          ctx.fillRect(x + pixelSize * 2, y + pixelSize * 10, pixelSize, pixelSize * 2)
+          ctx.fillRect(x + pixelSize * 5, y + pixelSize * 10, pixelSize, pixelSize)
+          
+          // Shoes
+          ctx.fillStyle = colors.shoes
+          ctx.fillRect(x + pixelSize, y + pixelSize * 11, pixelSize * 2, pixelSize)
+          ctx.fillRect(x + pixelSize * 5, y + pixelSize * 10, pixelSize * 2, pixelSize)
+        } else {
+          // Frame 2: Right leg forward, left leg back
+          ctx.fillRect(x + pixelSize * 2, y + pixelSize * 10, pixelSize, pixelSize)
+          ctx.fillRect(x + pixelSize * 5, y + pixelSize * 10, pixelSize, pixelSize * 2)
+          
+          // Shoes
+          ctx.fillStyle = colors.shoes
+          ctx.fillRect(x + pixelSize * 2, y + pixelSize * 10, pixelSize * 2, pixelSize)
+          ctx.fillRect(x + pixelSize * 4, y + pixelSize * 11, pixelSize * 2, pixelSize)
+        }
+      }
+      
+      // Restore canvas state after rotation
+      if (isJumping) {
+        ctx.restore()
+      }
+    }
+    
+    // Draw brick obstacle (like Mario pipes/blocks)
+    function drawBrick(x, y, width, height) {
+      const brickSize = 16
+      ctx.fillStyle = colors.brick
+      ctx.fillRect(x, y, width, height)
+      
+      // Brick pattern
+      ctx.strokeStyle = '#c47d2e'
+      ctx.lineWidth = 2
+      for (let i = 0; i < height; i += brickSize) {
+        for (let j = 0; j < width; j += brickSize) {
+          ctx.strokeRect(x + j, y + i, brickSize, brickSize)
+        }
+      }
+    }
+    
+    // Draw cloud
+    function drawCloud(x, y) {
+      ctx.fillStyle = colors.cloud
+      ctx.fillRect(x + 8, y, 32, 16)
+      ctx.fillRect(x, y + 8, 48, 16)
+      ctx.fillRect(x + 8, y + 16, 32, 8)
+    }
+    
+    // Spawn obstacle
+    function spawnObstacle() {
+      const height = 32 + Math.floor(Math.random() * 3) * 16
+      obstacles.push({
+        x: canvas.width,
+        y: groundY - height,
+        width: 32,
+        height: height,
+        speed: 4
+      })
+    }
+    
+    // Spawn cloud
+    function spawnCloud() {
+      clouds.push({
+        x: canvas.width,
+        y: 40 + Math.random() * 80,
+        speed: 0.5 + Math.random() * 0.5
+      })
+    }
+    
+    // Check collision
+    function checkCollision(player, obstacle) {
+      return player.x + 8 < obstacle.x + obstacle.width &&
+             player.x + player.width - 8 > obstacle.x &&
+             player.y + 8 < obstacle.y + obstacle.height &&
+             player.y + player.height > obstacle.y
+    }
+    
+    // Jump function
+    function jump() {
+      if (!player.jumping && !gameOver) {
+        player.velocityY = player.jumpPower
+        player.jumping = true
+      }
+    }
+    
+    // Handle keypress
+    function handleKeyPress(e) {
+      if (e.code === 'Space') {
+        e.preventDefault()
+        if (gameOver) {
+          // Restart game
+          setGameOver(false)
+          setScore(0)
+          obstacles.length = 0
+          clouds.length = 0
+          gameScore = 0
+          player.y = 280
+          player.velocityY = 0
+          player.jumping = false
+        } else {
+          jump()
+        }
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyPress)
+    
+    // Game loop
+    function gameLoop() {
+      frameCount++
+      
+      // Draw sky
+      ctx.fillStyle = colors.sky
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      
+      // Update and draw clouds
+      cloudTimer++
+      if (cloudTimer > 150) {
+        spawnCloud()
+        cloudTimer = 0
+      }
+      
+      for (let i = clouds.length - 1; i >= 0; i--) {
+        const cloud = clouds[i]
+        cloud.x -= cloud.speed
+        drawCloud(cloud.x, cloud.y)
+        
+        if (cloud.x < -60) {
+          clouds.splice(i, 1)
+        }
+      }
+      
+      if (!gameOver) {
+        // Update player physics
+        player.velocityY += player.gravity
+        player.y += player.velocityY
+        
+        // Ground collision
+        if (player.y + player.height >= groundY) {
+          player.y = groundY - player.height
+          player.velocityY = 0
+          player.jumping = false
+        }
+        
+        // Spawn obstacles
+        obstacleTimer++
+        if (obstacleTimer > 120) {
+          spawnObstacle()
+          obstacleTimer = 0
+        }
+        
+        // Update and draw obstacles
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+          const obstacle = obstacles[i]
+          obstacle.x -= obstacle.speed
+          
+          // Draw obstacle
+          drawBrick(obstacle.x, obstacle.y, obstacle.width, obstacle.height)
+          
+          // Check collision
+          if (checkCollision(player, obstacle)) {
+            setGameOver(true)
+          }
+          
+          // Remove off-screen obstacles and increase score
+          if (obstacle.x + obstacle.width < 0) {
+            obstacles.splice(i, 1)
+            gameScore += 10
+            setScore(gameScore)
+          }
+        }
+        
+        // Draw player with running bob effect
+        const runBob = player.jumping ? 0 : Math.sin(frameCount * 0.3) * 2
+        drawGirl(player.x, player.y + runBob, player.jumping, frameCount)
+      } else {
+        // Draw player even when game over
+        drawGirl(player.x, player.y, false, 0)
+      }
+      
+      // Draw ground
+      ctx.fillStyle = colors.ground
+      ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY)
+      
+      // Draw grass on top of ground
+      ctx.fillStyle = colors.grass
+      for (let i = 0; i < canvas.width; i += 16) {
+        ctx.fillRect(i, groundY, 16, 4)
+      }
+      
+      // Draw score
+      ctx.fillStyle = '#ffffff'
+      ctx.strokeStyle = '#000000'
+      ctx.lineWidth = 3
+      ctx.font = 'bold 24px monospace'
+      ctx.strokeText(`SCORE: ${gameScore}`, 10, 30)
+      ctx.fillText(`SCORE: ${gameScore}`, 10, 30)
+      
+      if (gameOver) {
+        // Game over screen with retro style
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        
+        ctx.fillStyle = '#ffffff'
+        ctx.strokeStyle = '#000000'
+        ctx.lineWidth = 4
+        ctx.font = 'bold 48px monospace'
+        const gameOverText = 'GAME OVER'
+        const textWidth = ctx.measureText(gameOverText).width
+        ctx.strokeText(gameOverText, canvas.width / 2 - textWidth / 2, canvas.height / 2)
+        ctx.fillText(gameOverText, canvas.width / 2 - textWidth / 2, canvas.height / 2)
+        
+        ctx.font = 'bold 20px monospace'
+        const restartText = 'LEERTASTE ZUM NEUSTART'
+        const restartWidth = ctx.measureText(restartText).width
+        ctx.strokeText(restartText, canvas.width / 2 - restartWidth / 2, canvas.height / 2 + 50)
+        ctx.fillText(restartText, canvas.width / 2 - restartWidth / 2, canvas.height / 2 + 50)
+      }
+      
+      animationId = requestAnimationFrame(gameLoop)
+    }
+    
+    gameLoop()
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress)
+      if (animationId) {
+        cancelAnimationFrame(animationId)
+      }
+    }
+  }, [gameStarted, gameOver])
+  
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ background: '#5c94fc' }}>
+      {!gameStarted ? (
+        <div className="flex flex-col items-center gap-8">
+          <h1 className="text-6xl font-mono font-bold" style={{ 
+            color: '#ffffff',
+            textShadow: '4px 4px 0px #000000, 8px 8px 0px rgba(0,0,0,0.3)',
+            letterSpacing: '0.1em'
+          }}>
+            JUMP & RUN
+          </h1>
+          <div className="text-2xl font-mono font-bold text-white" style={{
+            textShadow: '2px 2px 0px #000000'
+          }}>
+            🌟 Springe über die Hindernisse! 🌟
+          </div>
+          <p className="text-xl font-mono text-white" style={{
+            textShadow: '2px 2px 0px #000000'
+          }}>
+            Drücke LEERTASTE zum Springen
+          </p>
+          <button
+            onClick={() => setGameStarted(true)}
+            className="px-12 py-6 text-2xl font-mono font-bold rounded-lg transition-all duration-200 transform hover:scale-110"
+            style={{
+              background: '#00a800',
+              color: '#ffffff',
+              border: '4px solid #006400',
+              boxShadow: '0 6px 0 #006400, 0 8px 8px rgba(0,0,0,0.4)',
+              textShadow: '2px 2px 0px #006400'
+            }}
+            onMouseDown={(e) => {
+              e.currentTarget.style.transform = 'translateY(4px) scale(1.1)'
+              e.currentTarget.style.boxShadow = '0 2px 0 #006400, 0 4px 4px rgba(0,0,0,0.4)'
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.transform = 'translateY(0) scale(1.1)'
+              e.currentTarget.style.boxShadow = '0 6px 0 #006400, 0 8px 8px rgba(0,0,0,0.4)'
+            }}
+          >
+            ▶ START
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-6">
+          <canvas
+            ref={canvasRef}
+            width={800}
+            height={400}
+            className="rounded-lg"
+            style={{ 
+              maxWidth: '100%', 
+              height: 'auto',
+              border: '8px solid #8b5524',
+              boxShadow: '0 8px 16px rgba(0,0,0,0.5)'
+            }}
+          />
+          <div className="text-2xl font-mono font-bold px-6 py-3 rounded-lg" style={{
+            background: '#000000',
+            color: '#ffffff',
+            border: '4px solid #ffffff',
+            boxShadow: '0 4px 8px rgba(0,0,0,0.5)'
+          }}>
+            💎 Score: {score} | ⬆️ LEERTASTE zum Springen
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // Komponente für ein verschlüsseltes Wort
 function EncryptedWord({ word, isPunctuation = false }) {
   const [isHovered, setIsHovered] = useState(false)
@@ -241,28 +687,9 @@ export default function LepusAlbusPage() {
 
   const parts = parseText(text)
 
-  // Wenn die Lösung korrekt ist, zeige nur die Koordinaten und den Text
+  // Wenn die Lösung korrekt ist, zeige das Jump & Run Spiel
   if (showSuccess) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-4">
-        <div className="flex flex-col items-center gap-8 text-center">
-          {/* Koordinaten */}
-          <div className="text-white text-2xl sm:text-3xl md:text-4xl font-mono font-bold">
-            49°51&apos;13.2&quot;N 8°38&apos;56.9&quot;E
-          </div>
-          
-          {/* Datum */}
-          <div className="text-white text-xl sm:text-2xl font-mono">
-            Datum: _ _._ _._ _
-          </div>
-          
-          {/* Text */}
-          <div className="text-white text-lg sm:text-xl max-w-2xl leading-relaxed">
-            Hier wird es weitergehen. Und um zu verstehen wann, musst du an den Anfang zurückkehren.
-          </div>
-        </div>
-      </div>
-    )
+    return <JumpAndRunGame />
   }
 
   return (
